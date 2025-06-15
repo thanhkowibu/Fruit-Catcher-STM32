@@ -1,0 +1,21 @@
+# Build artifacts
+STM32CubeIDE/Debug/
+STM32CubeIDE/Release/
+*.o
+*.elf
+*.map
+*.list
+
+# IDE files
+.metadata/
+.settings/
+*.launch
+
+# TouchGFX generated (optional - team decision)
+TouchGFX/generated/simulator/
+TouchGFX/generated/texts/cache/
+TouchGFX/generated/fonts/cache/
+
+# System files
+.DS_Store
+Thumbs.db
