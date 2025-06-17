@@ -25,7 +25,7 @@ public:
      */
     virtual void deactivate();
 
-    virtual ~Screen1Presenter() {}
+    virtual ~Screen1Presenter() {};
 
 private:
     Screen1Presenter();
