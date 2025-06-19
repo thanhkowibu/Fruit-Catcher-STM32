@@ -470,14 +470,64 @@
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/SVGDatabase.cpp</locationURI>
 		</link>
 		<link>
+			<name>Application/User/generated/image_Blue_Icons_Home_32.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/__designer/image_Blue_Icons_Home_32.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_apple.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_apple.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_banana.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_banana.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_blast.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_blast.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_bomb.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_bomb.cpp</locationURI>
+		</link>
+		<link>
 			<name>Application/User/generated/image_gamelogo.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_gamelogo.cpp</locationURI>
 		</link>
 		<link>
+			<name>Application/User/generated/image_grape.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_grape.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_heart.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_heart.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_how-to-play-title.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_how-to-play-title.cpp</locationURI>
+		</link>
+		<link>
 			<name>Application/User/generated/image_how-to-play.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_how-to-play.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_restart.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_restart.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_snowflake.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_snowflake.cpp</locationURI>
 		</link>
 		<link>
 			<name>Application/User/generated/image_start-button.cpp</name>
@@ -488,6 +538,21 @@
 			<name>Application/User/generated/image_track0.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_track0.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_track1.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_track1.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_track2.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_track2.cpp</locationURI>
+		</link>
+		<link>
+			<name>Application/User/generated/image_wicker-basket.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/TouchGFX/generated/images/src/image_wicker-basket.cpp</locationURI>
 		</link>
 		<link>
 			<name>Application/User/generated/LanguageGb.cpp</name>

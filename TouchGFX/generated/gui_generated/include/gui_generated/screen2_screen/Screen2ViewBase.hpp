@@ -8,6 +8,10 @@
 #include <mvp/View.hpp>
 #include <gui/screen2_screen/Screen2Presenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <touchgfx/widgets/Image.hpp>
+#include <touchgfx/containers/buttons/Buttons.hpp>
+#include <touchgfx/widgets/TextArea.hpp>
+#include <touchgfx/widgets/TextAreaWithWildcard.hpp>
 
 class Screen2ViewBase : public touchgfx::View<Screen2Presenter>
 {
@@ -15,6 +19,14 @@ public:
     Screen2ViewBase();
     virtual ~Screen2ViewBase();
     virtual void setupScreen();
+
+    /*
+     * Virtual Action Handlers
+     */
+    virtual void restartGame()
+    {
+        // Override and implement this function in Screen2
+    }
 
 protected:
     FrontendApplication& application() {
@@ -25,8 +37,48 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    touchgfx::Image bg;
+    touchgfx::Image bgRed;
+    touchgfx::Image bgBlue;
+    touchgfx::Image basket;
+    touchgfx::IconButtonStyle< touchgfx::ClickButtonTrigger >  home;
+    touchgfx::Image apple;
+    touchgfx::Image grape;
+    touchgfx::Image banana;
+    touchgfx::Image blast;
+    touchgfx::Image heart;
+    touchgfx::Image snowflake;
+    touchgfx::Image bomb;
+    touchgfx::TextArea textGameOver;
+    touchgfx::ImageButtonStyle< touchgfx::ClickButtonTrigger >  flexButton2;
+    touchgfx::TextAreaWithOneWildcard textScore;
+    touchgfx::TextAreaWithOneWildcard textHighScore;
+    touchgfx::TextAreaWithOneWildcard hpScore;
+    touchgfx::TextArea textArea1;
+    touchgfx::TextArea hp;
+    touchgfx::TextArea textArea2;
+
+    /*
+     * Wildcard Buffers
+     */
+    static const uint16_t TEXTSCORE_SIZE = 20;
+    touchgfx::Unicode::UnicodeChar textScoreBuffer[TEXTSCORE_SIZE];
+    static const uint16_t TEXTHIGHSCORE_SIZE = 20;
+    touchgfx::Unicode::UnicodeChar textHighScoreBuffer[TEXTHIGHSCORE_SIZE];
+    static const uint16_t HPSCORE_SIZE = 20;
+    touchgfx::Unicode::UnicodeChar hpScoreBuffer[HPSCORE_SIZE];
 
 private:
+
+    /*
+     * Callback Declarations
+     */
+    touchgfx::Callback<Screen2ViewBase, const touchgfx::AbstractButtonContainer&> flexButtonCallback;
+
+    /*
+     * Callback Handler Declarations
+     */
+    void flexButtonCallbackHandler(const touchgfx::AbstractButtonContainer& src);
 
 };
 

@@ -10,6 +10,7 @@
 
 #include <touchgfx/transitions/NoTransition.hpp>
 #include <touchgfx/transitions/CoverTransition.hpp>
+#include <touchgfx/transitions/SlideTransition.hpp>
 
 #include <gui/common/FrontendApplication.hpp>
 #include <gui/model/Model.hpp>
@@ -74,7 +75,8 @@ public:
      */
     typedef touchgfx::meta::TypeList< touchgfx::NoTransition,
             touchgfx::meta::TypeList< CoverTransition<EAST>,
-            touchgfx::meta::Nil >
+            touchgfx::meta::TypeList< SlideTransition<EAST>,
+            touchgfx::meta::Nil > >
             > GeneratedTransitionTypes;
 
     /**

@@ -73,8 +73,281 @@
       },
       {
         "Name": "Screen2",
-        "Components": [],
-        "Interactions": []
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "bg",
+            "Width": 240,
+            "Height": 360,
+            "LockPosition": true,
+            "RelativeFilename": "track0.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "bgRed",
+            "Width": 240,
+            "Height": 360,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "track1.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "bgBlue",
+            "Width": 240,
+            "Height": 360,
+            "Visible": false,
+            "LockPosition": true,
+            "RelativeFilename": "track2.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "basket",
+            "X": 96,
+            "Y": 278,
+            "Width": 50,
+            "Height": 30,
+            "RelativeFilename": "wicker-basket.png"
+          },
+          {
+            "Type": "FlexButton",
+            "Name": "home",
+            "Y": 3,
+            "Width": 32,
+            "Height": 32,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "IconButtonStyle",
+                "IconReleased": "__designer\\Blue_Icons_Home_32.png",
+                "IconPressed": "__designer\\Blue_Icons_Home_32.png"
+              }
+            ]
+          },
+          {
+            "Type": "Image",
+            "Name": "apple",
+            "X": 161,
+            "Y": -43,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "apple.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "grape",
+            "X": 81,
+            "Y": -43,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "grape.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "banana",
+            "X": 131,
+            "Y": -43,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "banana.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "blast",
+            "X": 248,
+            "Y": -43,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "blast.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "heart",
+            "X": 17,
+            "Y": -43,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "heart.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "snowflake",
+            "X": 106,
+            "Y": -43,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "snowflake.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "bomb",
+            "X": 51,
+            "Y": -43,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "bomb.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textGameOver",
+            "X": 55,
+            "Y": 148,
+            "Width": 132,
+            "Height": 24,
+            "Visible": false,
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Blue": 21
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "FlexButton",
+            "Name": "flexButton2",
+            "X": 95,
+            "Y": 180,
+            "Width": 50,
+            "Height": 50,
+            "Visible": false,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "ImageButtonStyle",
+                "ImageReleased": "restart.png",
+                "ImagePressed": "restart.png"
+              }
+            ]
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textScore",
+            "X": 211,
+            "Y": 3,
+            "Width": 30,
+            "Height": 18,
+            "TextRotation": "0",
+            "Color": {
+              "Red": 148,
+              "Green": 255,
+              "Blue": 54
+            },
+            "AutoSize": true,
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 20
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textHighScore",
+            "X": 211,
+            "Y": 20,
+            "Width": 30,
+            "Height": 36,
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 243,
+              "Blue": 79
+            },
+            "AutoSize": true,
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 20
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "hpScore",
+            "X": 216,
+            "Y": 41,
+            "Width": 20,
+            "Height": 18,
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255
+            },
+            "AutoSize": true,
+            "Wildcard1": {
+              "UseBuffer": true,
+              "BufferSize": 20
+            }
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea1",
+            "X": 161,
+            "Y": 2,
+            "Width": 49,
+            "Height": 18,
+            "TextRotation": "0",
+            "Color": {
+              "Red": 148,
+              "Green": 255,
+              "Blue": 54
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "hp",
+            "X": 189,
+            "Y": 41,
+            "Width": 27,
+            "Height": 18,
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea2",
+            "X": 128,
+            "Y": 20,
+            "Width": 83,
+            "Height": 18,
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 243,
+              "Blue": 79
+            },
+            "AutoSize": true
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "home"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionSlide",
+              "ScreenTransitionDirection": "East",
+              "ActionComponent": "Screen1"
+            }
+          },
+          {
+            "InteractionName": "Interaction2",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "flexButton2"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "restartGame"
+            }
+          }
+        ]
       },
       {
         "Name": "Screen3",

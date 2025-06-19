@@ -3,12 +3,119 @@
 /*********************************************************************************/
 #include <gui_generated/screen2_screen/Screen2ViewBase.hpp>
 #include <touchgfx/Color.hpp>
+#include <images/BitmapDatabase.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 
-Screen2ViewBase::Screen2ViewBase()
+Screen2ViewBase::Screen2ViewBase() :
+    flexButtonCallback(this, &Screen2ViewBase::flexButtonCallbackHandler)
 {
     __background.setPosition(0, 0, 240, 320);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
+
+    bg.setXY(0, 0);
+    bg.setBitmap(touchgfx::Bitmap(BITMAP_TRACK0_ID));
+    add(bg);
+
+    bgRed.setXY(0, 0);
+    bgRed.setBitmap(touchgfx::Bitmap(BITMAP_TRACK1_ID));
+    bgRed.setVisible(false);
+    add(bgRed);
+
+    bgBlue.setXY(0, 0);
+    bgBlue.setBitmap(touchgfx::Bitmap(BITMAP_TRACK2_ID));
+    bgBlue.setVisible(false);
+    add(bgBlue);
+
+    basket.setXY(96, 278);
+    basket.setBitmap(touchgfx::Bitmap(BITMAP_WICKER_BASKET_ID));
+    add(basket);
+
+    home.setIconBitmaps(Bitmap(BITMAP_BLUE_ICONS_HOME_32_ID), Bitmap(BITMAP_BLUE_ICONS_HOME_32_ID));
+    home.setIconXY(0, 0);
+    home.setAction(flexButtonCallback);
+    home.setPosition(0, 3, 32, 32);
+    add(home);
+
+    apple.setXY(161, -43);
+    apple.setBitmap(touchgfx::Bitmap(BITMAP_APPLE_ID));
+    add(apple);
+
+    grape.setXY(81, -43);
+    grape.setBitmap(touchgfx::Bitmap(BITMAP_GRAPE_ID));
+    add(grape);
+
+    banana.setXY(131, -43);
+    banana.setBitmap(touchgfx::Bitmap(BITMAP_BANANA_ID));
+    add(banana);
+
+    blast.setXY(248, -43);
+    blast.setBitmap(touchgfx::Bitmap(BITMAP_BLAST_ID));
+    add(blast);
+
+    heart.setXY(17, -43);
+    heart.setBitmap(touchgfx::Bitmap(BITMAP_HEART_ID));
+    add(heart);
+
+    snowflake.setXY(106, -43);
+    snowflake.setBitmap(touchgfx::Bitmap(BITMAP_SNOWFLAKE_ID));
+    add(snowflake);
+
+    bomb.setXY(51, -43);
+    bomb.setBitmap(touchgfx::Bitmap(BITMAP_BOMB_ID));
+    add(bomb);
+
+    textGameOver.setXY(55, 148);
+    textGameOver.setColor(touchgfx::Color::getColorFromRGB(255, 0, 21));
+    textGameOver.setLinespacing(0);
+    textGameOver.setVisible(false);
+    add(textGameOver);
+
+    flexButton2.setBitmaps(Bitmap(BITMAP_RESTART_ID), Bitmap(BITMAP_RESTART_ID));
+    flexButton2.setBitmapXY(0, 0);
+    flexButton2.setVisible(false);
+    flexButton2.setAction(flexButtonCallback);
+    flexButton2.setPosition(95, 180, 50, 50);
+    add(flexButton2);
+
+    textScore.setXY(211, 3);
+    textScore.setColor(touchgfx::Color::getColorFromRGB(148, 255, 54));
+    textScore.setLinespacing(0);
+    textScoreBuffer[0] = 0;
+    textScore.setWildcard(textScoreBuffer);
+    textScore.resizeToCurrentText();
+    add(textScore);
+
+    textHighScore.setXY(211, 20);
+    textHighScore.setColor(touchgfx::Color::getColorFromRGB(255, 243, 79));
+    textHighScore.setLinespacing(0);
+    textHighScoreBuffer[0] = 0;
+    textHighScore.setWildcard(textHighScoreBuffer);
+    textHighScore.resizeToCurrentText();
+    add(textHighScore);
+
+    hpScore.setXY(216, 41);
+    hpScore.setColor(touchgfx::Color::getColorFromRGB(255, 0, 0));
+    hpScore.setLinespacing(0);
+    hpScoreBuffer[0] = 0;
+    hpScore.setWildcard(hpScoreBuffer);
+    hpScore.resizeToCurrentText();
+    add(hpScore);
+
+    textArea1.setXY(161, 2);
+    textArea1.setColor(touchgfx::Color::getColorFromRGB(148, 255, 54));
+    textArea1.setLinespacing(0);
+    add(textArea1);
+
+    hp.setXY(189, 41);
+    hp.setColor(touchgfx::Color::getColorFromRGB(255, 0, 0));
+    hp.setLinespacing(0);
+    add(hp);
+
+    textArea2.setXY(128, 20);
+    textArea2.setColor(touchgfx::Color::getColorFromRGB(255, 243, 79));
+    textArea2.setLinespacing(0);
+    add(textArea2);
 }
 
 Screen2ViewBase::~Screen2ViewBase()
@@ -19,4 +126,22 @@ Screen2ViewBase::~Screen2ViewBase()
 void Screen2ViewBase::setupScreen()
 {
 
+}
+
+void Screen2ViewBase::flexButtonCallbackHandler(const touchgfx::AbstractButtonContainer& src)
+{
+    if (&src == &home)
+    {
+        //Interaction1
+        //When home clicked change screen to Screen1
+        //Go to Screen1 with screen transition towards East
+        application().gotoScreen1ScreenSlideTransitionEast();
+    }
+    if (&src == &flexButton2)
+    {
+        //Interaction2
+        //When flexButton2 clicked call virtual function
+        //Call restartGame
+        restartGame();
+    }
 }
