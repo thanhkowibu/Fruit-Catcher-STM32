@@ -22,8 +22,11 @@ uint32_t xorshift32()
 
 Screen2View::Screen2View()
     : isGameOver(false), fallSpeed(2), speedLevel(0), basketSpeedStep(4), hp(10),
-      activeFruitCount(0), lastFruitSpawnTick(0), minSpawnInterval(30), maxSpawnInterval(90),
-      maxActiveFruits(2)
+      isBombActive(false), bombSpawnChance(3), isBlastActive(false),
+      blastTimer(0), blastX(0), blastY(0), activeFruitCount(0),
+      lastFruitSpawnTick(0), minSpawnInterval(30), maxSpawnInterval(90),
+      maxActiveFruits(2), isHeartActive(false), isSnowflakeActive(false),
+      snowflakeTimer(0), originalFallSpeed(2)
 {
     tickCount = 0;
     localImageX = 100;
@@ -42,6 +45,83 @@ bool Screen2View::checkCollisionWithFruit(FruitObject& fruit)
     int16_t h1 = basket.getHeight();
 
     return fruit.checkCollision(x1, y1, w1, h1);
+}
+
+bool Screen2View::checkCollisionWithBomb()
+{
+    if (!isBombActive) return false;
+    
+    int16_t x1 = basket.getX();
+    int16_t y1 = basket.getY();
+    int16_t w1 = basket.getWidth();
+    int16_t h1 = basket.getHeight();
+
+    int16_t x2 = bomb.getX();
+    int16_t y2 = bomb.getY();
+    int16_t w2 = bomb.getWidth();
+    int16_t h2 = bomb.getHeight();
+
+    return !(x1 + w1 < x2 || x2 + w2 < x1 ||
+             y1 + h1 < y2 || y2 + h2 < y1);
+}
+
+bool Screen2View::checkCollisionWithHeart()
+{
+    if (!isHeartActive) return false;
+    
+    int16_t x1 = basket.getX();
+    int16_t y1 = basket.getY();
+    int16_t w1 = basket.getWidth();
+    int16_t h1 = basket.getHeight();
+
+    int16_t x2 = heart.getX();
+    int16_t y2 = heart.getY();
+    int16_t w2 = heart.getWidth();
+    int16_t h2 = heart.getHeight();
+
+    return !(x1 + w1 < x2 || x2 + w2 < x1 ||
+             y1 + h1 < y2 || y2 + h2 < y1);
+}
+
+bool Screen2View::checkCollisionWithSnowflake()
+{
+    if (!isSnowflakeActive) return false;
+    
+    int16_t x1 = basket.getX();
+    int16_t y1 = basket.getY();
+    int16_t w1 = basket.getWidth();
+    int16_t h1 = basket.getHeight();
+
+    int16_t x2 = snowflake.getX();
+    int16_t y2 = snowflake.getY();
+    int16_t w2 = snowflake.getWidth();
+    int16_t h2 = snowflake.getHeight();
+
+    return !(x1 + w1 < x2 || x2 + w2 < x1 ||
+             y1 + h1 < y2 || y2 + h2 < y1);
+}
+
+void Screen2View::spawnSpecialItem()
+{
+    // Chọn ngẫu nhiên heart hoặc snowflake
+    SpecialItemType itemType = static_cast<SpecialItemType>(xorshift32() % 2);
+    
+    int index = xorshift32() % 6;
+    int newX = index * 40 + 15;
+    
+    if (itemType == SpecialItemType::HEART) {
+        isHeartActive = true;
+        heart.setX(newX);
+        heart.setY(0);
+        heart.setVisible(true);
+        heart.invalidate();
+    } else {
+        isSnowflakeActive = true;
+        snowflake.setX(newX);
+        snowflake.setY(0);
+        snowflake.setVisible(true);
+        snowflake.invalidate();
+    }
 }
 
 void Screen2View::spawnNewFruit()
@@ -147,6 +227,9 @@ void Screen2View::updateAllFruits()
                 if (hp <= 0) {
                     isGameOver = true;
                     textGameOver.setVisible(true);
+                    
+                    // Hiện button restart khi game over
+                    flexButton2.setVisible(true);
 
                     // Ẩn tất cả fruit và reset
                     for (int j = 0; j < MAX_FRUITS; j++) {
@@ -155,7 +238,9 @@ void Screen2View::updateAllFruits()
                     }
                     activeFruitCount = 0;
 
+                    bomb.setVisible(false);
                     textGameOver.invalidate();
+                    flexButton2.invalidate();
                     return;
                 }
             }
@@ -224,6 +309,7 @@ void Screen2View::setupScreen()
     score = 0;
     highScore = presenter->GetHighScore();
     hp = 10;
+    isBombActive = false;
     activeFruitCount = 0;
     lastFruitSpawnTick = 0;
     maxActiveFruits = 2; // Bắt đầu với 2 fruit
@@ -249,10 +335,22 @@ void Screen2View::setupScreen()
     textHighScore.setWildcard(highScoreBuffer);
     textHighScore.invalidate();
     
-    // Ẩn tất cả fruit
+    // Ẩn bomb, blast và special items khi bắt đầu
+    bomb.setVisible(false);
+    blast.setVisible(false);
+    heart.setVisible(false);
+    snowflake.setVisible(false);
+    isBlastActive = false;
+    blastTimer = 0;
+    isHeartActive = false;
+    isSnowflakeActive = false;
+    snowflakeTimer = 0;
+    
+    // Ẩn tất cả fruit và button restart
     apple.setVisible(false);
     banana.setVisible(false);
     grape.setVisible(false);
+    flexButton2.setVisible(false);
 
     // Khởi tạo array fruit
     for (int i = 0; i < MAX_FRUITS; i++) {
@@ -280,6 +378,7 @@ void Screen2View::handleTickEvent()
             // Reset lại trạng thái game
             score = 0;
             hp = 10;
+            isBombActive = false;
             activeFruitCount = 0;
             lastFruitSpawnTick = 0;
             maxActiveFruits = 2;
@@ -301,6 +400,16 @@ void Screen2View::handleTickEvent()
             minSpawnInterval = 30;
             maxSpawnInterval = 90;
 
+            bomb.setVisible(false);
+            blast.setVisible(false);
+            heart.setVisible(false);
+            snowflake.setVisible(false);
+            isBlastActive = false;
+            blastTimer = 0;
+            isHeartActive = false;
+            isSnowflakeActive = false;
+            snowflakeTimer = 0;
+            originalFallSpeed = 2;
             basket.setX(localImageX);
             textGameOver.setVisible(false);
 
@@ -313,8 +422,11 @@ void Screen2View::handleTickEvent()
             spawnNewFruit();
 
             basket.invalidate();
+            bomb.invalidate();
+            blast.invalidate();
             textGameOver.invalidate();
         }
+
         return;
     }
 
@@ -337,12 +449,150 @@ void Screen2View::handleTickEvent()
     // 2. Animation và logic game
     tickCount++;
 
+    // Xử lý blast effect timer
+    if (isBlastActive) {
+        blastTimer++;
+        if (blastTimer >= 60) {
+            isBlastActive = false;
+            blast.setVisible(false);
+            blast.invalidate();
+            blastTimer = 0;
+        }
+    }
+
     // 3. Xử lý tất cả fruits
     updateAllFruits();
     checkAllFruitCollisions();
     spawnFruitIfNeeded();
 
-    // 4. Tăng độ khó theo thời gian
+    // 4. Xử lý bomb rơi (nếu có)
+    if (isBombActive) {
+        int newBombY = bomb.getY() + fallSpeed;
+        if (newBombY >= 320) {
+            isBombActive = false;
+            bomb.setVisible(false);
+            bomb.invalidate();
+        } else {
+            bomb.setY(newBombY);
+        }
+    }
+
+    // 5. Kiểm tra va chạm với bomb
+    if (checkCollisionWithBomb()) {
+        blastX = bomb.getX();
+        blastY = bomb.getY();
+
+        isBombActive = false;
+        bomb.setVisible(false);
+        bomb.invalidate();
+
+        isBlastActive = true;
+        blastTimer = 0;
+        blast.setX(blastX);
+        blast.setY(blastY);
+        blast.setVisible(true);
+        blast.invalidate();
+
+        hp--;
+
+        Unicode::snprintf(hpBuffer, sizeof(hpBuffer), "%d", hp);
+        hpScore.setWildcard(hpBuffer);
+        hpScore.invalidate();
+
+        if (hp <= 0) {
+            isGameOver = true;
+            textGameOver.setVisible(true);
+            
+            // Hiện button restart khi game over
+            flexButton2.setVisible(true);
+
+            for (int i = 0; i < MAX_FRUITS; i++) {
+                activeFruits[i].setVisible(false);
+            }
+            activeFruitCount = 0;
+
+            textGameOver.invalidate();
+            flexButton2.invalidate();
+            return;
+        }
+    }
+    
+    // 5b. Xử lý special items
+    // Xử lý heart rơi
+    if (isHeartActive) {
+        int newHeartY = heart.getY() + fallSpeed;
+        if (newHeartY >= 320) {
+            isHeartActive = false;
+            heart.setVisible(false);
+            heart.invalidate();
+        } else {
+            heart.setY(newHeartY);
+        }
+    }
+    
+    // Xử lý snowflake rơi
+    if (isSnowflakeActive) {
+        int newSnowflakeY = snowflake.getY() + fallSpeed;
+        if (newSnowflakeY >= 320) {
+            isSnowflakeActive = false;
+            snowflake.setVisible(false);
+            snowflake.invalidate();
+        } else {
+            snowflake.setY(newSnowflakeY);
+        }
+    }
+    
+    // Kiểm tra va chạm với heart
+    if (checkCollisionWithHeart()) {
+        hp++;
+        isHeartActive = false;
+        heart.setVisible(false);
+        heart.invalidate();
+        
+        Unicode::snprintf(hpBuffer, sizeof(hpBuffer), "%d", hp);
+        hpScore.setWildcard(hpBuffer);
+        hpScore.invalidate();
+    }
+    
+    // Kiểm tra va chạm với snowflake
+    if (checkCollisionWithSnowflake()) {
+        // Kích hoạt slowdown effect trong 5 giây (300 ticks)
+        originalFallSpeed = fallSpeed;
+        fallSpeed = fallSpeed / 2; // Giảm tốc độ xuống một nửa
+        if (fallSpeed < 1) fallSpeed = 1;
+        
+        snowflakeTimer = 300; // 5 giây @ 60Hz
+        isSnowflakeActive = false;
+        snowflake.setVisible(false);
+        snowflake.invalidate();
+    }
+    
+    // Xử lý snowflake timer
+    if (snowflakeTimer > 0) {
+        snowflakeTimer--;
+        if (snowflakeTimer == 0) {
+            // Khôi phục tốc độ ban đầu
+            fallSpeed = originalFallSpeed;
+        }
+    }
+
+    // 6. Tạo bomb ngẫu nhiên (6 làn)
+    if (!isBombActive && (tickCount % 60 == 0) && (xorshift32() % bombSpawnChance == 0)) {
+        isBombActive = true;
+        bomb.setY(0);
+        int index = xorshift32() % 6;
+        int newX = index * 40 + 15;
+        bomb.setX(newX);
+        bomb.setVisible(true);
+        bomb.invalidate();
+    }
+    
+    // 6b. Tạo special items (heart/snowflake) với 10% cơ hội mỗi 2 giây
+    if (!isHeartActive && !isSnowflakeActive && (tickCount % 120 == 0) && (xorshift32() % 10 == 0)) {
+        spawnSpecialItem();
+    }
+
+    // 7. Tăng độ khó theo thời gian
     if (tickCount % 300 == 0) { // Mỗi 5 giây
         // Tăng tốc độ
         if (fallSpeed < 5) {
@@ -362,6 +612,11 @@ void Screen2View::handleTickEvent()
         }
         if (maxSpawnInterval > 45) {
             maxSpawnInterval -= 3;
+        }
+
+        // Tăng tỷ lệ bomb xuất hiện (giảm bombSpawnChance = tăng tỷ lệ)
+        if (bombSpawnChance > 50) {
+            bombSpawnChance -= 5;
         }
     }
 
