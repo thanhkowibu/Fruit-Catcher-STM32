@@ -2,7 +2,7 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Main program body
+  * @brief          : Main program body (Game Logic Only - No Audio)
   ******************************************************************************
   * @attention
   *
@@ -21,6 +21,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "app_touchgfx.h"
+#include "stdbool.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -62,7 +63,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-CRC_HandleTypeDef hcrc;
+ CRC_HandleTypeDef hcrc;
 
 DMA2D_HandleTypeDef hdma2d;
 
@@ -89,7 +90,17 @@ const osThreadAttr_t GUI_Task_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-uint8_t isRevD = 0; /* Applicable only for STM32F429I DISCOVERY REVD and above */
+osMessageQueueId_t Queue1Handle;
+const osMessageQueueAttr_t Queue1_attributes = {
+  .name = "Queue1"
+};
+
+osStatus_t r_state;
+
+/* Game tuning variables for easy testing */
+uint16_t specialEffectSpawnChance = 5;  // 1/5 = 20% cơ hội
+uint16_t specialEffectSpawnInterval = 60;  // Mỗi 1 giây @ 60Hz
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -106,8 +117,6 @@ extern void TouchGFX_Task(void *argument);
 
 /* USER CODE BEGIN PFP */
 static void BSP_SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram, FMC_SDRAM_CommandTypeDef *Command);
-
-
 
 static uint8_t            I2C3_ReadData(uint8_t Addr, uint8_t Reg);
 static void               I2C3_WriteData(uint8_t Addr, uint8_t Reg, uint8_t Value);
@@ -133,6 +142,9 @@ void                      IOE_Write(uint8_t Addr, uint8_t Reg, uint8_t Value);
 uint8_t                   IOE_Read(uint8_t Addr, uint8_t Reg);
 uint16_t                  IOE_ReadMultiple(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint16_t Length);
 
+/* Game control functions - No audio integration */
+void                      handle_button_input(void);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -149,7 +161,6 @@ uint32_t Spi5Timeout = SPI5_TIMEOUT_MAX; /*<! Value of Timeout when SPI communic
   */
 int main(void)
 {
-
   /* USER CODE BEGIN 1 */
 
   /* USER CODE END 1 */
@@ -179,10 +190,8 @@ int main(void)
   MX_LTDC_Init();
   MX_DMA2D_Init();
   MX_TouchGFX_Init();
-  /* Call PreOsInit function */
-  MX_TouchGFX_PreOSInit();
   /* USER CODE BEGIN 2 */
-
+  
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -201,7 +210,8 @@ int main(void)
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
+  /* creation of Queue1 */
+  Queue1Handle = osMessageQueueNew (8, sizeof(uint8_t), &Queue1_attributes);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -212,7 +222,6 @@ int main(void)
   GUI_TaskHandle = osThreadNew(TouchGFX_Task, NULL, &GUI_Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
-  /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -223,7 +232,6 @@ int main(void)
   osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -257,17 +265,10 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 8;
-  RCC_OscInitStruct.PLL.PLLN = 360;
+  RCC_OscInitStruct.PLL.PLLN = 336;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /** Activate the Over-Drive mode
-  */
-  if (HAL_PWREx_EnableOverDrive() != HAL_OK)
   {
     Error_Handler();
   }
@@ -498,19 +499,7 @@ static void MX_SPI5_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN SPI5_Init 2 */
-  // Check if the board has the old or new revision of the gyroscope
-  // This tells if the board is revision D or newer
-  // It is used to handle the touch input correctly
-  const uint8_t READ_ID_CMD = 0x8F; // 0b10001111 = set read bit and register address of WHO_AM_I
-  uint8_t pdata = 0;
-  HAL_GPIO_WritePin(SPI5_NCS_GPIO_Port, SPI5_NCS_Pin, GPIO_PIN_RESET);
-  HAL_SPI_Transmit(&hspi5, &READ_ID_CMD, 1, 1000);
-  HAL_SPI_Receive(&hspi5, &pdata, 1, 1000);
-  HAL_GPIO_WritePin(SPI5_NCS_GPIO_Port, SPI5_NCS_Pin, GPIO_PIN_SET);
-  if (pdata == 0xD3) // 0b11010011
-  {
-    isRevD = 1;
-  }
+
   /* USER CODE END SPI5_Init 2 */
 
 }
@@ -574,8 +563,6 @@ static void MX_FMC_Init(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  /* USER CODE BEGIN MX_GPIO_Init_1 */
-  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOE_CLK_ENABLE();
@@ -591,9 +578,6 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOE, VSYNC_FREQ_Pin|RENDER_TIME_Pin|FRAME_RATE_Pin|MCU_ACTIVE_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(SPI5_NCS_GPIO_Port, SPI5_NCS_Pin, GPIO_PIN_SET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -605,13 +589,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : SPI5_NCS_Pin */
-  GPIO_InitStruct.Pin = SPI5_NCS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(SPI5_NCS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PC2 */
   GPIO_InitStruct.Pin = GPIO_PIN_2;
@@ -627,14 +604,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PG2 PG3 */
-  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_3;
+  /*Configure GPIO pin : PA0 for button input*/
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PG2 and PG3 for game controls */
+  GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
-  /* USER CODE BEGIN MX_GPIO_Init_2 */
-  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -961,6 +942,15 @@ void LCD_Delay(uint32_t Delay)
   HAL_Delay(Delay);
 }
 
+/**
+  * @brief  Game control button handling function
+  */
+void handle_button_input(void)
+{
+    // Simple button handling for game controls
+    // This could be expanded to include game-specific logic
+}
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -973,10 +963,40 @@ void LCD_Delay(uint32_t Delay)
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+  static uint8_t button_a_prev = 0;  // Lưu trạng thái trước của nút A
+  uint8_t button_a_current;
+  
   /* Infinite loop */
   for(;;)
   {
-    osDelay(100);
+	  // Left button (PG2) - Game movement
+	  if (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_2) == GPIO_PIN_RESET) {
+	      uint8_t msg = 'L';  // Left movement
+	      osMessageQueuePut(Queue1Handle, &msg, 0, 0);
+	  }
+	  
+	  // Right button (PG3) - Game movement
+	  if (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_3) == GPIO_PIN_RESET) {
+	      uint8_t msg = 'R';  // Right movement
+	      osMessageQueuePut(Queue1Handle, &msg, 0, 0);
+	  }
+	  
+	  // Button A (PA0) - Reset/restart with edge detection
+	  button_a_current = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+	  if (button_a_current == GPIO_PIN_SET) {
+	      uint8_t msg = 'A';  // Reset/restart
+	      osMessageQueuePut(Queue1Handle, &msg, 0, 0);
+	      
+	      // Additional game logic can be added here
+	      // For example: debug functions, special actions, etc.
+	      if (button_a_prev == 0) {
+	          // Button press detected (rising edge)
+	          // Add any special game actions here
+	      }
+	  }
+	  button_a_prev = button_a_current;
+	  
+	  osDelay(10);  // 10ms delay để giảm bounce và CPU usage
   }
   /* USER CODE END 5 */
 }
@@ -994,8 +1014,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM6)
-  {
+  if (htim->Instance == TIM6) {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
@@ -1030,4 +1049,4 @@ void assert_failed(uint8_t *file, uint32_t line)
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
 }
-#endif /* USE_FULL_ASSERT */
+#endif /* USE_FULL_ASSERT */ 

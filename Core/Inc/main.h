@@ -2,7 +2,7 @@
 /**
   ******************************************************************************
   * @file           : main.h
-  * @brief          : Header for main.c file.
+  * @brief          : Header for main.c file (Game Logic Only - No Audio)
   *                   This file contains the common defines of the application.
   ******************************************************************************
   * @attention
@@ -32,7 +32,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdint.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -42,7 +42,9 @@ extern "C" {
 
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
-
+/* Game tuning variables for easy testing */
+extern uint16_t specialEffectSpawnChance;
+extern uint16_t specialEffectSpawnInterval;
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -55,6 +57,9 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
+/* Game Control Functions - No Audio System */
+void handle_button_input(void);
+
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -66,9 +71,6 @@ void Error_Handler(void);
 #define FRAME_RATE_GPIO_Port GPIOE
 #define MCU_ACTIVE_Pin GPIO_PIN_5
 #define MCU_ACTIVE_GPIO_Port GPIOE
-#define SPI5_NCS_Pin GPIO_PIN_1
-#define SPI5_NCS_GPIO_Port GPIOC
-
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
@@ -77,4 +79,4 @@ void Error_Handler(void);
 }
 #endif
 
-#endif /* __MAIN_H */
+#endif /* __MAIN_H */ 
