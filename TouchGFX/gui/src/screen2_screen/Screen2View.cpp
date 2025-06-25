@@ -6,6 +6,10 @@
 
 extern osMessageQueueId_t Queue1Handle;
 
+// Game tuning variables - sử dụng extern variables từ main.c
+extern uint16_t specialEffectSpawnChance;
+extern uint16_t specialEffectSpawnInterval;
+
 uint32_t xorshift32()
 {
     static uint32_t seed = 0;
@@ -26,7 +30,8 @@ Screen2View::Screen2View()
       blastTimer(0), blastX(0), blastY(0), activeFruitCount(0),
       lastFruitSpawnTick(0), minSpawnInterval(30), maxSpawnInterval(90),
       maxActiveFruits(2), isHeartActive(false), isSnowflakeActive(false),
-      snowflakeTimer(0), originalFallSpeed(2)
+      snowflakeTimer(0), originalFallSpeed(2), isDamageBgActive(false),
+      damageBgTimer(0)
 {
     tickCount = 0;
     localImageX = 100;
@@ -124,6 +129,65 @@ void Screen2View::spawnSpecialItem()
     }
 }
 
+void Screen2View::updateBgEffects()
+{
+    // Xử lý damage bg timer
+    if (isDamageBgActive) {
+        damageBgTimer--;
+        if (damageBgTimer <= 0) {
+            isDamageBgActive = false;
+            resetToNormalBg();
+        }
+    }
+}
+
+void Screen2View::showDamageBg()
+{
+    // Ẩn bg bình thường và bg frozen
+    bg.setVisible(false);
+    bgBlue.setVisible(false);
+    
+    // Hiện bg damage
+    bgRed.setVisible(true);
+    
+    // Invalidate để update hiển thị
+    bg.invalidate();
+    bgRed.invalidate();
+    bgBlue.invalidate();
+    
+    // Set timer cho 0.25 giây (15 ticks @ 60Hz)
+    isDamageBgActive = true;
+    damageBgTimer = 15;
+}
+
+void Screen2View::resetToNormalBg()
+{
+    if (snowflakeTimer > 0) {
+        // Nếu đang có frozen effect, hiện bgBlue
+        bg.setVisible(false);
+        bgRed.setVisible(false);
+        bgBlue.setVisible(true);
+    } else {
+        // Không có effect nào, hiện bg bình thường
+        bgRed.setVisible(false);
+        bgBlue.setVisible(false);
+        bg.setVisible(true);
+    }
+    
+    // Invalidate để update hiển thị
+    bg.invalidate();
+    bgRed.invalidate();
+    bgBlue.invalidate();
+}
+
+void Screen2View::forceSpawnSpecialItem()
+{
+    // Debug function: Force spawn special item ngay lập tức để test
+    if (!isHeartActive && !isSnowflakeActive) {
+        spawnSpecialItem();
+    }
+}
+
 void Screen2View::spawnNewFruit()
 {
     // Tìm slot trống trong array
@@ -207,6 +271,9 @@ void Screen2View::updateAllFruits()
             if (activeFruits[i].y >= 320) {
                 // Fruit ra khỏi màn hình -> trừ 1 HP
                 hp--;
+                
+                // Hiển thị damage bg effect
+                showDamageBg();
 
                 // Ẩn fruit này và reset trạng thái
                 activeFruits[i].setVisible(false);
@@ -346,6 +413,13 @@ void Screen2View::setupScreen()
     isSnowflakeActive = false;
     snowflakeTimer = 0;
     
+    // Khởi tạo bg effects - hiện bg bình thường
+    bg.setVisible(true);
+    bgRed.setVisible(false);
+    bgBlue.setVisible(false);
+    isDamageBgActive = false;
+    damageBgTimer = 0;
+    
     // Ẩn tất cả fruit và button restart
     apple.setVisible(false);
     banana.setVisible(false);
@@ -410,8 +484,15 @@ void Screen2View::handleTickEvent()
             isSnowflakeActive = false;
             snowflakeTimer = 0;
             originalFallSpeed = 2;
+            isDamageBgActive = false;
+            damageBgTimer = 0;
             basket.setX(localImageX);
             textGameOver.setVisible(false);
+
+            // Hiện lại đường bình thường
+            bg.setVisible(true);
+            bgRed.setVisible(false);
+            bgBlue.setVisible(false);
 
             // Reset fruit array
             for (int i = 0; i < MAX_FRUITS; i++) {
@@ -464,6 +545,9 @@ void Screen2View::handleTickEvent()
     updateAllFruits();
     checkAllFruitCollisions();
     spawnFruitIfNeeded();
+    
+    // 3b. Xử lý bg effects
+    updateBgEffects();
 
     // 4. Xử lý bomb rơi (nếu có)
     if (isBombActive) {
@@ -494,6 +578,9 @@ void Screen2View::handleTickEvent()
         blast.invalidate();
 
         hp--;
+
+        // Hiển thị damage bg effect
+        showDamageBg();
 
         Unicode::snprintf(hpBuffer, sizeof(hpBuffer), "%d", hp);
         hpScore.setWildcard(hpBuffer);
@@ -565,6 +652,16 @@ void Screen2View::handleTickEvent()
         isSnowflakeActive = false;
         snowflake.setVisible(false);
         snowflake.invalidate();
+        
+        // Hiển thị frozen bg effect (bgBlue) nếu không đang có damage effect
+        if (!isDamageBgActive) {
+            bg.setVisible(false);
+            bgRed.setVisible(false);
+            bgBlue.setVisible(true);
+            bg.invalidate();
+            bgRed.invalidate();
+            bgBlue.invalidate();
+        }
     }
     
     // Xử lý snowflake timer
@@ -573,6 +670,11 @@ void Screen2View::handleTickEvent()
         if (snowflakeTimer == 0) {
             // Khôi phục tốc độ ban đầu
             fallSpeed = originalFallSpeed;
+            
+            // Reset về bg bình thường nếu không có damage effect
+            if (!isDamageBgActive) {
+                resetToNormalBg();
+            }
         }
     }
 
@@ -587,8 +689,10 @@ void Screen2View::handleTickEvent()
         bomb.invalidate();
     }
     
-    // 6b. Tạo special items (heart/snowflake) với 10% cơ hội mỗi 2 giây
-    if (!isHeartActive && !isSnowflakeActive && (tickCount % 120 == 0) && (xorshift32() % 10 == 0)) {
+    // 6b. Tạo special items (heart/snowflake) - sử dụng biến từ main.c để dễ test
+    if (!isHeartActive && !isSnowflakeActive && 
+        (tickCount % specialEffectSpawnInterval == 0) && 
+        (xorshift32() % specialEffectSpawnChance == 0)) {
         spawnSpecialItem();
     }
 
