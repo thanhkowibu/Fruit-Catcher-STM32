@@ -24,8 +24,6 @@
     "OptionalComponents": [
     ],
     "AdditionalFeatures": [
-      "CWRVector",
-      "VectorFonts"
     ]
   },
   "Version": "4.25.0"

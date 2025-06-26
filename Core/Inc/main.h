@@ -52,6 +52,8 @@ extern uint16_t specialEffectSpawnInterval;
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -79,4 +81,4 @@ void handle_button_input(void);
 }
 #endif
 
-#endif /* __MAIN_H */ 
+#endif /* __MAIN_H */
