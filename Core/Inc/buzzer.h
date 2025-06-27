@@ -19,9 +19,9 @@ typedef struct {
 
 /* Music System - MIDI-like format but non-blocking */
 typedef struct {
-    uint16_t frequency;
-    uint16_t duration;
-    uint16_t pause;
+    uint16_t frequency;  // Tần số (Hz)
+    uint16_t duration;   // Thời gian phát (ms)
+    uint16_t pause;      // Thời gian nghỉ sau note (ms)
 } MusicNote_t;
 
 typedef struct {
@@ -46,13 +46,32 @@ typedef struct {
 #define B4  494
 
 #define C5  523
+#define CS5 554
 #define D5  587
+#define DS5 622
 #define E5  659
+#define F5  698
+#define FS5 740
 #define G5  784
 #define GS5 831
 #define A5  880
+#define AS5 932
+#define B5  988
 
-#define REST 0
+#define C6  1047
+#define CS6 1109
+#define D6  1175
+#define DS6 1245
+#define E6  1319
+#define F6  1397
+#define FS6 1480
+#define G6  1568
+#define GS6 1661
+#define A6  1760
+#define AS6 1865
+#define B6  1976
+
+#define REST 0  // Nghỉ (không phát âm)
 
 /* Function Prototypes */
 void buzzer_init(TIM_HandleTypeDef *htim, uint32_t channel, osMessageQueueId_t queue);
@@ -63,10 +82,17 @@ void buzzer_play_test_sequence(void);
 void buzzer_task(void *argument);
 void buzzer_play_music_track(MusicNote_t* notes, uint16_t noteCount);
 void buzzer_stop_music_track(void);
+void buzzer_play_game_over(void);
+void buzzer_play_intro_music(void);
+void buzzer_play_catch_sound(void);
+void buzzer_play_lose_hp(void);
+void buzzer_play_special_effect(void);
+
+/* Debug function */
 void buzzer_debug_test(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __BUZZER_H */
+#endif /* __BUZZER_H */ 
