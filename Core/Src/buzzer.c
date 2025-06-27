@@ -15,6 +15,9 @@ static TIM_HandleTypeDef *buzzer_htim;
 static uint32_t buzzer_channel;
 static osMessageQueueId_t buzzer_queue;
 
+/* Global music track variable */
+static MusicTrack_t currentTrack = {0};
+
 /* Public Functions ----------------------------------------------------------*/
 
 /**
@@ -114,9 +117,78 @@ void buzzer_task(void *argument)
             
             osDelay(20);
         }
+        else if (currentTrack.isPlaying && currentTrack.notes != NULL)
+        {
+            MusicNote_t* currentNote = &currentTrack.notes[currentTrack.currentNote];
+            
+            if (currentNote->frequency > 0)
+            {
+                uint32_t period = 1000000 / currentNote->frequency;
+                uint32_t pulse = period / 2;
+
+                __HAL_TIM_SET_AUTORELOAD(buzzer_htim, period - 1);
+                __HAL_TIM_SET_COMPARE(buzzer_htim, buzzer_channel, pulse);
+
+                HAL_TIM_PWM_Start(buzzer_htim, buzzer_channel);
+                osDelay(currentNote->duration);
+                HAL_TIM_PWM_Stop(buzzer_htim, buzzer_channel);
+            }
+            else
+            {
+                osDelay(currentNote->duration);
+            }
+            
+            if (currentNote->pause > 0)
+            {
+                osDelay(currentNote->pause);
+            }
+            
+            currentTrack.currentNote++;
+            
+            if (currentTrack.currentNote >= currentTrack.noteCount)
+            {
+                currentTrack.isPlaying = false;
+                currentTrack.currentNote = 0;
+            }
+        }
         else
         {
             osDelay(20);
         }
     }
+}
+
+/**
+  * @brief  Play a music track (non-blocking)
+  * @param  notes: Array of music notes
+  * @param  noteCount: Number of notes in the track
+  */
+void buzzer_play_music_track(MusicNote_t* notes, uint16_t noteCount)
+{
+    buzzer_stop_music_track();
+    
+    currentTrack.notes = notes;
+    currentTrack.noteCount = noteCount;
+    currentTrack.currentNote = 0;
+    currentTrack.isPlaying = true;
+}
+
+/**
+  * @brief  Stop current music track
+  */
+void buzzer_stop_music_track(void)
+{
+    currentTrack.isPlaying = false;
+    currentTrack.currentNote = 0;
+    HAL_TIM_PWM_Stop(buzzer_htim, buzzer_channel);
+}
+
+/**
+  * @brief  Debug function to test buzzer queue
+  */
+void buzzer_debug_test(void)
+{
+    buzzer_play_tone(C4, 100);
+    buzzer_play_tone(E4, 100);
+    buzzer_play_tone(G4, 100);
 }
