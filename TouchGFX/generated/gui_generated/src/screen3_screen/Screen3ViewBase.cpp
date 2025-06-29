@@ -3,12 +3,99 @@
 /*********************************************************************************/
 #include <gui_generated/screen3_screen/Screen3ViewBase.hpp>
 #include <touchgfx/Color.hpp>
+#include <images/BitmapDatabase.hpp>
+#include <texts/TextKeysAndLanguages.hpp>
 
-Screen3ViewBase::Screen3ViewBase()
+Screen3ViewBase::Screen3ViewBase() :
+    flexButtonCallback(this, &Screen3ViewBase::flexButtonCallbackHandler)
 {
     __background.setPosition(0, 0, 240, 320);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
+
+    bg.setXY(0, 0);
+    bg.setBitmap(touchgfx::Bitmap(BITMAP_TRACK0_ID));
+    add(bg);
+
+    basket.setXY(96, 278);
+    basket.setBitmap(touchgfx::Bitmap(BITMAP_WICKER_BASKET_ID));
+    add(basket);
+
+    apple.setXY(2, 108);
+    apple.setBitmap(touchgfx::Bitmap(BITMAP_APPLE_ID));
+    add(apple);
+
+    grape.setXY(2, 183);
+    grape.setBitmap(touchgfx::Bitmap(BITMAP_GRAPE_ID));
+    add(grape);
+
+    banana.setXY(2, 144);
+    banana.setBitmap(touchgfx::Bitmap(BITMAP_BANANA_ID));
+    add(banana);
+
+    heart.setXY(145, 144);
+    heart.setBitmap(touchgfx::Bitmap(BITMAP_HEART_ID));
+    add(heart);
+
+    snowflake.setXY(146, 180);
+    snowflake.setBitmap(touchgfx::Bitmap(BITMAP_SNOWFLAKE_ID));
+    add(snowflake);
+
+    bomb.setXY(146, 108);
+    bomb.setBitmap(touchgfx::Bitmap(BITMAP_BOMB_ID));
+    add(bomb);
+
+    textArea1.setXY(32, 120);
+    textArea1.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    textArea1.setLinespacing(0);
+    textArea1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_POTH));
+    add(textArea1);
+
+    textArea2.setXY(34, 156);
+    textArea2.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    textArea2.setLinespacing(0);
+    textArea2.setTypedText(touchgfx::TypedText(T___SINGLEUSE_DOBZ));
+    add(textArea2);
+
+    textArea3.setXY(34, 192);
+    textArea3.setColor(touchgfx::Color::getColorFromRGB(255, 255, 255));
+    textArea3.setLinespacing(0);
+    textArea3.setTypedText(touchgfx::TypedText(T___SINGLEUSE_JTK8));
+    add(textArea3);
+
+    textArea4.setXY(175, 120);
+    textArea4.setColor(touchgfx::Color::getColorFromRGB(8, 2, 2));
+    textArea4.setLinespacing(0);
+    textArea4.setTypedText(touchgfx::TypedText(T___SINGLEUSE_KCXD));
+    add(textArea4);
+
+    textArea5.setXY(175, 156);
+    textArea5.setColor(touchgfx::Color::getColorFromRGB(224, 31, 31));
+    textArea5.setLinespacing(0);
+    textArea5.setTypedText(touchgfx::TypedText(T___SINGLEUSE_T5HZ));
+    add(textArea5);
+
+    textArea6.setXY(179, 186);
+    textArea6.setColor(touchgfx::Color::getColorFromRGB(39, 30, 212));
+    textArea6.setLinespacing(0);
+    textArea6.setTypedText(touchgfx::TypedText(T___SINGLEUSE_KNRH));
+    add(textArea6);
+
+    textArea7.setXY(0, 232);
+    textArea7.setColor(touchgfx::Color::getColorFromRGB(41, 32, 212));
+    textArea7.setLinespacing(0);
+    textArea7.setTypedText(touchgfx::TypedText(T___SINGLEUSE_QXSK));
+    add(textArea7);
+
+    title.setXY(5, 54);
+    title.setBitmap(touchgfx::Bitmap(BITMAP_HOW_TO_PLAY_TITLE_ID));
+    add(title);
+
+    home.setIconBitmaps(Bitmap(BITMAP_BLUE_ICONS_HOME_32_ID), Bitmap(BITMAP_BLUE_ICONS_HOME_32_ID));
+    home.setIconXY(0, 0);
+    home.setAction(flexButtonCallback);
+    home.setPosition(0, 3, 32, 32);
+    add(home);
 }
 
 Screen3ViewBase::~Screen3ViewBase()
@@ -19,4 +106,15 @@ Screen3ViewBase::~Screen3ViewBase()
 void Screen3ViewBase::setupScreen()
 {
 
+}
+
+void Screen3ViewBase::flexButtonCallbackHandler(const touchgfx::AbstractButtonContainer& src)
+{
+    if (&src == &home)
+    {
+        //Interaction1
+        //When home clicked change screen to Screen1
+        //Go to Screen1 with screen transition towards East
+        application().gotoScreen1ScreenSlideTransitionEast();
+    }
 }

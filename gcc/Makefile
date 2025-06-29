@@ -177,7 +177,7 @@ all_components := $(components) \
 	$(asset_images_output) \
 	$(asset_texts_output)
 
-
+#keep framework include and source out of this mess! :)
 include_paths := $(library_includes) \
     $(foreach comp, $(all_components), $(comp)/include) \
     $(foreach comp, $(cubemx_components), $(comp)/Inc) \

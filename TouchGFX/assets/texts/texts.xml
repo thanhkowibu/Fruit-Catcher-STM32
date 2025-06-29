@@ -5,10 +5,75 @@
   </Languages>
   <Texts>
     <TextGroup Id="Group1" />
+    <TextGroup Id="Unsorted">
+      <Text Id="__SingleUse_QXSK" Alignment="Center" TypographyId="Typography_02">
+        <Translation Language="GB">Use left/right button to &#10;move the basket</Translation>
+      </Text>
+      <Text Id="__SingleUse_KNRH" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">= slow</Translation>
+      </Text>
+      <Text Id="__SingleUse_T5HZ" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">= +1 hp</Translation>
+      </Text>
+      <Text Id="__SingleUse_KCXD" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">= -1 hp</Translation>
+      </Text>
+      <Text Id="__SingleUse_JTK8" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">= 3 points</Translation>
+      </Text>
+      <Text Id="__SingleUse_DOBZ" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">= 2 points</Translation>
+      </Text>
+      <Text Id="__SingleUse_POTH" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">= 1 point</Translation>
+      </Text>
+      <Text Id="__SingleUse_YH1P" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">000</Translation>
+      </Text>
+      <Text Id="__SingleUse_0C6N" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_Q8UZ" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">00</Translation>
+      </Text>
+      <Text Id="__SingleUse_H4TL" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="__SingleUse_56RU" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">HP:</Translation>
+      </Text>
+      <Text Id="__SingleUse_D86P" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">HighScore:</Translation>
+      </Text>
+      <Text Id="__SingleUse_3K2G" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">Score:</Translation>
+      </Text>
+      <Text Id="__SingleUse_XBPY" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">000&#10;</Translation>
+      </Text>
+      <Text Id="__SingleUse_4FKX" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">&lt;value&gt;</Translation>
+      </Text>
+      <Text Id="score_text" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">New Text</Translation>
+      </Text>
+      <Text Id="textHighScore" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">HighScore:"%d"</Translation>
+      </Text>
+      <Text Id="textScore" Alignment="Left" TypographyId="Small">
+        <Translation Language="GB">Score: "%d"</Translation>
+      </Text>
+      <Text Id="__SingleUse_Z9QT" Alignment="Left" TypographyId="Default">
+        <Translation Language="GB">GAME OVER!</Translation>
+      </Text>
+    </TextGroup>
   </Texts>
   <Typographies>
     <Typography Id="Default" Font="verdana.ttf" Size="20" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" />
     <Typography Id="Large" Font="verdana.ttf" Size="40" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" />
-    <Typography Id="Small" Font="verdana.ttf" Size="10" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" />
+    <Typography Id="Small" Font="verdana.ttf" Size="15" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" WildcardCharacterRanges="0-9" />
+    <Typography Id="Typography_00" Font="ebrimabd.ttf" Size="24" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" />
+    <Typography Id="Typography_01" Font="verdana.ttf" Size="24" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" />
+    <Typography Id="Typography_02" Font="verdana.ttf" Size="20" Bpp="4" IsVector="no" Direction="LTR" FallbackCharacter="?" />
   </Typographies>
 </TextDatabase>

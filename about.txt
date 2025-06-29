@@ -1,0 +1,2 @@
+Skeleton for simple racing game, built on TouchGFX4.22 + STM32CubeIDE 1.16.
+(C) Ngo Lam Trung 2024

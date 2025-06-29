@@ -51,7 +51,7 @@ public:
     {
     }
 
-    virtual void initialize();
+    void initialize();
 
     /* Overwriting default implementation of taskEntry */
     virtual void taskEntry();

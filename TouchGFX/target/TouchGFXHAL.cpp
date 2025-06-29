@@ -31,11 +31,8 @@ extern "C" {
 
 using namespace touchgfx;
 
-namespace
-{
-LOCATION_PRAGMA_NOLOAD("TouchGFX_Framebuffer")
-uint32_t animationStorage[(240 * 320 * 2 + 3) / 4] LOCATION_ATTRIBUTE_NOLOAD("TouchGFX_Framebuffer");
-}
+LOCATION_PRAGMA("TouchGFX_Framebuffer")
+uint32_t animationStorage[(240 * 320 * 2 + 3) / 4] LOCATION_ATTRIBUTE("TouchGFX_Framebuffer");
 
 void TouchGFXHAL::initialize()
 {
@@ -47,8 +44,8 @@ void TouchGFXHAL::initialize()
 
     TouchGFXGeneratedHAL::initialize();
 
-    // Add animation storage
-    setAnimationStorage((void*)animationStorage);
+    // existing frame buffers are re-used. just add animation storage
+    setFrameBufferStartAddresses((void*)frameBuffer0, (void*)frameBuffer1, (void*)animationStorage);
 }
 
 void TouchGFXHAL::taskEntry()

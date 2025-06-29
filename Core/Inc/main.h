@@ -2,7 +2,7 @@
 /**
   ******************************************************************************
   * @file           : main.h
-  * @brief          : Header for main.c file (Game Logic Only - No Audio)
+  * @brief          : Header for main.c file.
   *                   This file contains the common defines of the application.
   ******************************************************************************
   * @attention
@@ -59,8 +59,24 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 
-/* Game Control Functions - No Audio System */
-void handle_button_input(void);
+/* Music System Functions - C linkage for C++ compatibility */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void play_tone(uint16_t frequency, uint16_t duration);
+void play_test_sequence(void);
+void play_catch_sound(void);
+void play_lose_hp(void);
+void play_game_over(void);
+void play_intro_music(void);
+void play_special_effect(void);
+void stop_music_track(void);
+void play_debug_test(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 /* USER CODE END EFP */
 

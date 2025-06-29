@@ -10,5 +10,24 @@ KEEP extern const uint32_t indicesGb[] TEXT_LOCATION_FLASH_ATTRIBUTE;
 // Remap all strings
 TEXT_LOCATION_FLASH_PRAGMA
 KEEP extern const uint32_t indicesGb[] TEXT_LOCATION_FLASH_ATTRIBUTE = {
-    0
+    0,   // T___SINGLEUSE_QXSK: "Use left/right button to \nmove the basket"
+    150, // T___SINGLEUSE_KNRH: "= slow"
+    134, // T___SINGLEUSE_T5HZ: "= +1 hp"
+    142, // T___SINGLEUSE_KCXD: "= -1 hp"
+    80,  // T___SINGLEUSE_JTK8: "= 3 points"
+    69,  // T___SINGLEUSE_DOBZ: "= 2 points"
+    113, // T___SINGLEUSE_POTH: "= 1 point"
+    162, // T___SINGLEUSE_YH1P: "000"
+    132, // T___SINGLEUSE_0C6N: "<>"
+    163, // T___SINGLEUSE_Q8UZ: "00"
+    132, // T___SINGLEUSE_H4TL: "<>"
+    166, // T___SINGLEUSE_56RU: "HP:"
+    102, // T___SINGLEUSE_D86P: "HighScore:"
+    106, // T___SINGLEUSE_3K2G: "Score:"
+    157, // T___SINGLEUSE_XBPY: "000\n"
+    132, // T___SINGLEUSE_4FKX: "<>"
+    123, // T_SCORE_TEXT: "New Text"
+    42,  // T_TEXTHIGHSCORE: "HighScore:"%d""
+    57,  // T_TEXTSCORE: "Score: "%d""
+    91   // T___SINGLEUSE_Z9QT: "GAME OVER!"
 };

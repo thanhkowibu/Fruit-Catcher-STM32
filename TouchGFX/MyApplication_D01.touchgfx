@@ -197,6 +197,7 @@
             "Width": 132,
             "Height": 24,
             "Visible": false,
+            "TextId": "__SingleUse_Z9QT",
             "TextRotation": "0",
             "Color": {
               "Red": 255,
@@ -230,6 +231,7 @@
             "Y": 3,
             "Width": 30,
             "Height": 18,
+            "TextId": "__SingleUse_0C6N",
             "TextRotation": "0",
             "Color": {
               "Red": 148,
@@ -238,6 +240,7 @@
             },
             "AutoSize": true,
             "Wildcard1": {
+              "TextId": "__SingleUse_YH1P",
               "UseBuffer": true,
               "BufferSize": 20
             }
@@ -249,6 +252,7 @@
             "Y": 20,
             "Width": 30,
             "Height": 36,
+            "TextId": "__SingleUse_4FKX",
             "TextRotation": "0",
             "Color": {
               "Red": 255,
@@ -257,6 +261,7 @@
             },
             "AutoSize": true,
             "Wildcard1": {
+              "TextId": "__SingleUse_XBPY",
               "UseBuffer": true,
               "BufferSize": 20
             }
@@ -268,12 +273,14 @@
             "Y": 41,
             "Width": 20,
             "Height": 18,
+            "TextId": "__SingleUse_H4TL",
             "TextRotation": "0",
             "Color": {
               "Red": 255
             },
             "AutoSize": true,
             "Wildcard1": {
+              "TextId": "__SingleUse_Q8UZ",
               "UseBuffer": true,
               "BufferSize": 20
             }
@@ -285,6 +292,7 @@
             "Y": 2,
             "Width": 49,
             "Height": 18,
+            "TextId": "__SingleUse_3K2G",
             "TextRotation": "0",
             "Color": {
               "Red": 148,
@@ -300,6 +308,7 @@
             "Y": 41,
             "Width": 27,
             "Height": 18,
+            "TextId": "__SingleUse_56RU",
             "TextRotation": "0",
             "Color": {
               "Red": 255
@@ -313,6 +322,7 @@
             "Y": 20,
             "Width": 83,
             "Height": 18,
+            "TextId": "__SingleUse_D86P",
             "TextRotation": "0",
             "Color": {
               "Red": 255,
@@ -351,8 +361,231 @@
       },
       {
         "Name": "Screen3",
-        "Components": [],
-        "Interactions": []
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "bg",
+            "Width": 240,
+            "Height": 360,
+            "LockPosition": true,
+            "RelativeFilename": "track0.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "basket",
+            "X": 96,
+            "Y": 278,
+            "Width": 50,
+            "Height": 30,
+            "RelativeFilename": "wicker-basket.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "apple",
+            "X": 2,
+            "Y": 108,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "apple.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "grape",
+            "X": 2,
+            "Y": 183,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "grape.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "banana",
+            "X": 2,
+            "Y": 144,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "banana.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "heart",
+            "X": 145,
+            "Y": 144,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "heart.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "snowflake",
+            "X": 146,
+            "Y": 180,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "snowflake.png"
+          },
+          {
+            "Type": "Image",
+            "Name": "bomb",
+            "X": 146,
+            "Y": 108,
+            "Width": 30,
+            "Height": 30,
+            "RelativeFilename": "bomb.png"
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea1",
+            "X": 32,
+            "Y": 120,
+            "Width": 70,
+            "Height": 18,
+            "TextId": "__SingleUse_POTH",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea2",
+            "X": 34,
+            "Y": 156,
+            "Width": 78,
+            "Height": 18,
+            "TextId": "__SingleUse_DOBZ",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea3",
+            "X": 34,
+            "Y": 192,
+            "Width": 78,
+            "Height": 18,
+            "TextId": "__SingleUse_JTK8",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea4",
+            "X": 175,
+            "Y": 120,
+            "Width": 58,
+            "Height": 18,
+            "TextId": "__SingleUse_KCXD",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 8,
+              "Green": 2,
+              "Blue": 2
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea5",
+            "X": 175,
+            "Y": 156,
+            "Width": 63,
+            "Height": 18,
+            "TextId": "__SingleUse_T5HZ",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 224,
+              "Green": 31,
+              "Blue": 31
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea6",
+            "X": 179,
+            "Y": 186,
+            "Width": 50,
+            "Height": 18,
+            "TextId": "__SingleUse_KNRH",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 39,
+              "Green": 30,
+              "Blue": 212
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "TextArea",
+            "Name": "textArea7",
+            "Y": 232,
+            "Width": 239,
+            "Height": 48,
+            "TextId": "__SingleUse_QXSK",
+            "TextRotation": "0",
+            "Color": {
+              "Red": 41,
+              "Green": 32,
+              "Blue": 212
+            },
+            "AutoSize": true
+          },
+          {
+            "Type": "Image",
+            "Name": "title",
+            "X": 5,
+            "Y": 54,
+            "Width": 230,
+            "Height": 35,
+            "RelativeFilename": "how-to-play-title.png"
+          },
+          {
+            "Type": "FlexButton",
+            "Name": "home",
+            "Y": 3,
+            "Width": 32,
+            "Height": 32,
+            "ButtonTrigger": {
+              "Type": "ClickButtonTrigger"
+            },
+            "ButtonStyles": [
+              {
+                "Type": "IconButtonStyle",
+                "IconReleased": "__designer\\Blue_Icons_Home_32.png",
+                "IconPressed": "__designer\\Blue_Icons_Home_32.png"
+              }
+            ]
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "home"
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionSlide",
+              "ScreenTransitionDirection": "East",
+              "ActionComponent": "Screen1"
+            }
+          }
+        ]
       }
     ],
     "CustomContainerDefinitions": [],
@@ -418,10 +651,7 @@
     "ProjectFile": "../STM32F429I_DISCO_REV_D01.ioc",
     "OptionalComponentsRoot": "../Middlewares/ST/touchgfx_components",
     "OptionalComponents": [],
-    "AdditionalFeatures": [
-      "CWRVector",
-      "VectorFonts"
-    ]
+    "AdditionalFeatures": []
   },
   "Version": "4.25.0",
   "CreatedBy": "4.20.0"

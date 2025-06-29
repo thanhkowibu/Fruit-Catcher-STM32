@@ -16,3 +16,23 @@ void Screen2Presenter::deactivate()
 {
 
 }
+
+void Screen2Presenter::UpdateImageX(int16_t x)
+{
+	model->update(x);
+}
+
+int16_t Screen2Presenter::GetImageX()
+{
+	return model->GetImageX();
+}
+
+void Screen2Presenter::SetHighScore(int score)
+{
+	model->setHighScore(score);
+}
+
+int Screen2Presenter::GetHighScore()
+{
+	return model->getHighScore();
+}

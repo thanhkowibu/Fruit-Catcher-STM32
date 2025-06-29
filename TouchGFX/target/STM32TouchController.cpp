@@ -45,8 +45,6 @@ typedef enum
 uint8_t BSP_TS_Init(uint16_t XSize, uint16_t YSize);
 void    BSP_TS_GetState(TS_StateTypeDef* TsState);
 
-extern "C" uint8_t isRevD; /* Applicable only for STM32F429I DISCOVERY REVD and above */
-
 void STM32TouchController::init()
 {
     /**
@@ -88,7 +86,8 @@ bool STM32TouchController::sampleTouch(int32_t& x, int32_t& y)
   */
 uint8_t BSP_TS_Init(uint16_t XSize, uint16_t YSize)
 {
-    uint8_t ret = TS_ERROR;
+
+	uint8_t ret = TS_ERROR;
 
     /* Initialize x and y positions boundaries */
     TsXBoundary = XSize;
@@ -128,31 +127,23 @@ void BSP_TS_GetState(TS_StateTypeDef* TsState)
     {
         TsDrv->GetXY(TS_I2C_ADDRESS, &x, &y);
 
-        if (isRevD)
+        //Ensures the coordinates is within the screen
+        if (y > 3700)
         {
-            //Ensures the coordinates are within the screen
-            if (y > 3700)
-            {
-                y = 3700;
-            }
-            else if (y < 180)
-            {
-                y = 180;
-            }
-
-            /* Y value first correction */
-            y -= 180;
-
-            /* Y value second correction */
-            y = 3520 - y;
+            y = 3700;
         }
-        else
+        else if (y < 180)
         {
-            /* Y value first correction */
-            y -= 360;
+            y = 180;
         }
+
+        /* Y value first correction */
+        y -= 180;
 
         /* Y value second correction */
+        y = 3520 - y;
+
+        /* Y value third correction */
         yr = y / 11;
 
         /* Return y position value */
@@ -165,7 +156,8 @@ void BSP_TS_GetState(TS_StateTypeDef* TsState)
             yr = TsYBoundary - 1;
         }
         else
-        {}
+        {
+        }
         y = yr;
 
         /* X value first correction */
@@ -191,7 +183,8 @@ void BSP_TS_GetState(TS_StateTypeDef* TsState)
             xr = TsXBoundary - 1;
         }
         else
-        {}
+        {
+        }
 
         x = xr;
         xDiff = x > _x ? (x - _x) : (_x - x);

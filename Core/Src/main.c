@@ -2,7 +2,7 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Main program body (Game Logic Only - No Audio)
+  * @brief          : Main program body
   ******************************************************************************
   * @attention
   *
@@ -21,10 +21,12 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "app_touchgfx.h"
+#include "stdbool.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Components/ili9341/ili9341.h"
+#include "buzzer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -96,11 +98,27 @@ const osMessageQueueAttr_t Queue1_attributes = {
   .name = "Queue1"
 };
 
+/* Buzzer Task and Queue */
+osThreadId_t BuzzerTaskHandle;
+const osThreadAttr_t BuzzerTask_attributes = {
+  .name = "BuzzerTask",
+  .stack_size = 512 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+
+osMessageQueueId_t BuzzerQueueHandle;
+const osMessageQueueAttr_t BuzzerQueue_attributes = {
+  .name = "BuzzerQueue"
+};
+
 osStatus_t r_state;
 
 /* Game tuning variables for easy testing */
+
+/* Đặt lại như ban đầu: 10% mỗi 2 giây */
 uint16_t specialEffectSpawnChance = 5;  // 1/5 = 20% cơ hội
 uint16_t specialEffectSpawnInterval = 60;  // Mỗi 1 giây @ 60Hz
+
 
 /* USER CODE END PV */
 
@@ -115,10 +133,13 @@ static void MX_LTDC_Init(void);
 static void MX_DMA2D_Init(void);
 static void MX_TIM1_Init(void);
 void StartDefaultTask(void *argument);
+void BuzzerTask(void *argument);
 extern void TouchGFX_Task(void *argument);
 
 /* USER CODE BEGIN PFP */
 static void BSP_SDRAM_Initialization_Sequence(SDRAM_HandleTypeDef *hsdram, FMC_SDRAM_CommandTypeDef *Command);
+
+
 
 static uint8_t            I2C3_ReadData(uint8_t Addr, uint8_t Reg);
 static void               I2C3_WriteData(uint8_t Addr, uint8_t Reg, uint8_t Value);
@@ -144,8 +165,14 @@ void                      IOE_Write(uint8_t Addr, uint8_t Reg, uint8_t Value);
 uint8_t                   IOE_Read(uint8_t Addr, uint8_t Reg);
 uint16_t                  IOE_ReadMultiple(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint16_t Length);
 
-/* Game control functions - No audio integration */
-void                      handle_button_input(void);
+/* Wrapper functions for Screen2View */
+void                      play_tone(uint16_t frequency, uint16_t duration);
+void                      play_game_over(void);
+void                      play_intro_music(void);
+void                      play_catch_sound(void);
+void                      play_lose_hp(void);
+void                      play_special_effect(void);
+void                      play_debug_test(void);
 
 /* USER CODE END PFP */
 
@@ -215,6 +242,12 @@ int main(void)
   /* USER CODE BEGIN RTOS_QUEUES */
   /* creation of Queue1 */
   Queue1Handle = osMessageQueueNew (8, sizeof(uint8_t), &Queue1_attributes);
+  
+  /* creation of BuzzerQueue */
+  BuzzerQueueHandle = osMessageQueueNew (16, sizeof(BuzzerCommand_t), &BuzzerQueue_attributes);
+  
+  /* Initialize buzzer system AFTER queue creation */
+  buzzer_init(&htim1, TIM_CHANNEL_2, BuzzerQueueHandle);
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -225,6 +258,8 @@ int main(void)
   GUI_TaskHandle = osThreadNew(TouchGFX_Task, NULL, &GUI_Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
+  /* creation of BuzzerTask */
+  BuzzerTaskHandle = osThreadNew(BuzzerTask, NULL, &BuzzerTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -503,6 +538,8 @@ static void MX_SPI5_Init(void)
   }
   /* USER CODE BEGIN SPI5_Init 2 */
 
+
+
   /* USER CODE END SPI5_Init 2 */
 
 }
@@ -682,6 +719,21 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PA0 interrupt rising edge*/
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PG2 and PG3 for input */
+  GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  //HAL_NVIC_SetPriority(EXTI0_IRQn, configMAX_SYSCALL_INTERRUPT_PRIORITY+5 , 0);
+  //HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 }
 
 /* USER CODE BEGIN 4 */
@@ -1009,12 +1061,70 @@ void LCD_Delay(uint32_t Delay)
 }
 
 /**
-  * @brief  Game control button handling function
+  * @brief  Wrapper function to play a tone - calls buzzer module
+  * @param  frequency: Frequency in Hz
+  * @param  duration: Duration in ms
   */
-void handle_button_input(void)
+void play_tone(uint16_t frequency, uint16_t duration)
 {
-    // Simple button handling for game controls
-    // This could be expanded to include game-specific logic
+    buzzer_play_tone(frequency, duration);
+}
+
+/**
+  * @brief  Wrapper function to play game over music - calls buzzer module
+  */
+void play_game_over(void)
+{
+    buzzer_play_game_over();
+}
+
+/**
+  * @brief  Wrapper function to play intro music - calls buzzer module
+  */
+void play_intro_music(void)
+{
+    buzzer_play_intro_music();
+}
+
+/**
+  * @brief  Wrapper function to play catch sound - calls buzzer module
+  */
+void play_catch_sound(void)
+{
+    buzzer_play_catch_sound();
+}
+
+/**
+  * @brief  Wrapper function to play lose HP sound - calls buzzer module
+  */
+void play_lose_hp(void)
+{
+    buzzer_play_lose_hp();
+}
+
+/**
+  * @brief  Wrapper function to play special effect sound - calls buzzer module
+  */
+void play_special_effect(void)
+{
+    buzzer_play_special_effect();
+}
+
+/**
+  * @brief  Debug function to test buzzer queue
+  */
+void play_debug_test(void)
+{
+    buzzer_debug_test();
+}
+
+/**
+  * @brief  Buzzer Task - wrapper that calls buzzer module task
+  * @param  argument: Not used
+  */
+void BuzzerTask(void *argument)
+{
+    buzzer_task(argument);
 }
 
 /* USER CODE END 4 */
@@ -1026,6 +1136,13 @@ void handle_button_input(void)
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
+
+/* Temporary workaround - include buzzer.c if build system doesn't pick it up */
+#define BUZZER_INCLUDE_WORKAROUND
+#ifdef BUZZER_INCLUDE_WORKAROUND
+#include "buzzer.c"
+#endif
+
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
@@ -1035,34 +1152,29 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  // Left button (PG2) - Game movement
 	  if (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_2) == GPIO_PIN_RESET) {
 	      uint8_t msg = 'L';  // Left movement
 	      osMessageQueuePut(Queue1Handle, &msg, 0, 0);
 	  }
-	  
-	  // Right button (PG3) - Game movement
 	  if (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_3) == GPIO_PIN_RESET) {
-	      uint8_t msg = 'R';  // Right movement
+	      uint8_t msg = 'R';  // Right
 	      osMessageQueuePut(Queue1Handle, &msg, 0, 0);
 	  }
 	  
-	  // Button A (PA0) - Reset/restart with edge detection
+	  // Xử lý nút A với edge detection để tránh phát buzzer liên tục
 	  button_a_current = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
 	  if (button_a_current == GPIO_PIN_SET) {
-	      uint8_t msg = 'A';  // Reset/restart
+	      uint8_t msg = 'A';  // Reset
 	      osMessageQueuePut(Queue1Handle, &msg, 0, 0);
 	      
-	      // Additional game logic can be added here
-	      // For example: debug functions, special actions, etc.
+	      // Debug test - phát 3 beep để test queue hoạt động
 	      if (button_a_prev == 0) {
-	          // Button press detected (rising edge)
-	          // Add any special game actions here
+	          play_debug_test();  // Test buzzer queue
 	      }
 	  }
 	  button_a_prev = button_a_current;
 	  
-	  osDelay(10);  // 10ms delay để giảm bounce và CPU usage
+	  osDelay(10);  // Tăng delay lên 10ms để giảm bounce
   }
   /* USER CODE END 5 */
 }

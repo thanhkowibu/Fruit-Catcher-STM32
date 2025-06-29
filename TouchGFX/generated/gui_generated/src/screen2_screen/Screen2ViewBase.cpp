@@ -68,6 +68,7 @@ Screen2ViewBase::Screen2ViewBase() :
     textGameOver.setXY(55, 148);
     textGameOver.setColor(touchgfx::Color::getColorFromRGB(255, 0, 21));
     textGameOver.setLinespacing(0);
+    textGameOver.setTypedText(touchgfx::TypedText(T___SINGLEUSE_Z9QT));
     textGameOver.setVisible(false);
     add(textGameOver);
 
@@ -81,40 +82,46 @@ Screen2ViewBase::Screen2ViewBase() :
     textScore.setXY(211, 3);
     textScore.setColor(touchgfx::Color::getColorFromRGB(148, 255, 54));
     textScore.setLinespacing(0);
-    textScoreBuffer[0] = 0;
+    Unicode::snprintf(textScoreBuffer, TEXTSCORE_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_YH1P).getText());
     textScore.setWildcard(textScoreBuffer);
     textScore.resizeToCurrentText();
+    textScore.setTypedText(touchgfx::TypedText(T___SINGLEUSE_0C6N));
     add(textScore);
 
     textHighScore.setXY(211, 20);
     textHighScore.setColor(touchgfx::Color::getColorFromRGB(255, 243, 79));
     textHighScore.setLinespacing(0);
-    textHighScoreBuffer[0] = 0;
+    Unicode::snprintf(textHighScoreBuffer, TEXTHIGHSCORE_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_XBPY).getText());
     textHighScore.setWildcard(textHighScoreBuffer);
     textHighScore.resizeToCurrentText();
+    textHighScore.setTypedText(touchgfx::TypedText(T___SINGLEUSE_4FKX));
     add(textHighScore);
 
     hpScore.setXY(216, 41);
     hpScore.setColor(touchgfx::Color::getColorFromRGB(255, 0, 0));
     hpScore.setLinespacing(0);
-    hpScoreBuffer[0] = 0;
+    Unicode::snprintf(hpScoreBuffer, HPSCORE_SIZE, "%s", touchgfx::TypedText(T___SINGLEUSE_Q8UZ).getText());
     hpScore.setWildcard(hpScoreBuffer);
     hpScore.resizeToCurrentText();
+    hpScore.setTypedText(touchgfx::TypedText(T___SINGLEUSE_H4TL));
     add(hpScore);
 
     textArea1.setXY(161, 2);
     textArea1.setColor(touchgfx::Color::getColorFromRGB(148, 255, 54));
     textArea1.setLinespacing(0);
+    textArea1.setTypedText(touchgfx::TypedText(T___SINGLEUSE_3K2G));
     add(textArea1);
 
     hp.setXY(189, 41);
     hp.setColor(touchgfx::Color::getColorFromRGB(255, 0, 0));
     hp.setLinespacing(0);
+    hp.setTypedText(touchgfx::TypedText(T___SINGLEUSE_56RU));
     add(hp);
 
     textArea2.setXY(128, 20);
     textArea2.setColor(touchgfx::Color::getColorFromRGB(255, 243, 79));
     textArea2.setLinespacing(0);
+    textArea2.setTypedText(touchgfx::TypedText(T___SINGLEUSE_D86P));
     add(textArea2);
 }
 

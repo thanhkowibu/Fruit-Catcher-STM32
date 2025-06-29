@@ -23,6 +23,7 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "cmsis_os.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -61,6 +62,7 @@ extern LTDC_HandleTypeDef hltdc;
 extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
+extern osMessageQueueId_t Queue1Handle;
 
 /* USER CODE END EV */
 
@@ -203,5 +205,18 @@ void DMA2D_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-
+void EXTI0_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI0_IRQn 0 */
+	uint32_t count = osMessageQueueGetCount(Queue1Handle);
+	if (count < 2)
+	{
+		uint8_t x = 'A';
+		osMessageQueuePut(Queue1Handle, &x, 0, 200);
+	}
+  /* USER CODE END EXTI0_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+  /* USER CODE BEGIN EXTI0_IRQn 1 */
+  /* USER CODE END EXTI0_IRQn 1 */
+}
 /* USER CODE END 1 */

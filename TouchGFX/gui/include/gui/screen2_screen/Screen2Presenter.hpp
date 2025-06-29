@@ -25,7 +25,13 @@ public:
      */
     virtual void deactivate();
 
-    virtual ~Screen2Presenter() {}
+    virtual ~Screen2Presenter() {};
+    void UpdateImageX(int16_t x);
+    int16_t GetImageX();
+    
+    // HighScore management
+    void SetHighScore(int score);
+    int GetHighScore();
 
 private:
     Screen2Presenter();

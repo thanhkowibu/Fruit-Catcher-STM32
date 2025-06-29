@@ -1,5 +1,5 @@
-#ifndef SCREEN2VIEW_VER5_HPP
-#define SCREEN2VIEW_VER5_HPP
+#ifndef SCREEN2VIEW_HPP
+#define SCREEN2VIEW_HPP
 
 #include <gui_generated/screen2_screen/Screen2ViewBase.hpp>
 #include <gui/screen2_screen/Screen2Presenter.hpp>
@@ -95,6 +95,7 @@ protected:
     Unicode::UnicodeChar scoreBuffer[30];
     Unicode::UnicodeChar highScoreBuffer[30];
     Unicode::UnicodeChar hpBuffer[20];
+    // comboBuffer được định nghĩa trong base class rồi
     int score;
     int highScore;  // Regular variable, will be synced with model
     int hp;
@@ -108,12 +109,15 @@ protected:
     bool isBombActive;
     int16_t bombSpawnChance;
     
+    // Combo system đã được xóa
+    
+    
     // Quản lý blast effect
     bool isBlastActive;
     int blastTimer;
     int16_t blastX, blastY;
     
-    // Quản lý nhiều trái cây
+    // Quản lý nhiều trái cây - THAY ĐỔI CHÍNH
     static const int MAX_FRUITS = 6;  // Tối đa 6 fruit cùng lúc
     FruitObject activeFruits[MAX_FRUITS];
     int activeFruitCount;
@@ -132,9 +136,9 @@ protected:
     int snowflakeTimer;      // Timer cho snowflake effect
     int16_t originalFallSpeed;    // Lưu tốc độ gốc trước khi bị snowflake ảnh hưởng
     
-    // Background effects - VERSION 5 NEW FEATURES
+    // Background effects
     bool isDamageBgActive;     // Hiện bg đỏ khi bị trừ HP
     int damageBgTimer;         // Timer cho bg đỏ (15 ticks = 0.25 giây)
 };
 
-#endif // SCREEN2VIEW_VER5_HPP 
+#endif // SCREEN2VIEW_HPP

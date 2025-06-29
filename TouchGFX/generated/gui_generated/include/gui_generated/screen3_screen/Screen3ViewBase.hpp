@@ -8,6 +8,9 @@
 #include <mvp/View.hpp>
 #include <gui/screen3_screen/Screen3Presenter.hpp>
 #include <touchgfx/widgets/Box.hpp>
+#include <touchgfx/widgets/Image.hpp>
+#include <touchgfx/widgets/TextArea.hpp>
+#include <touchgfx/containers/buttons/Buttons.hpp>
 
 class Screen3ViewBase : public touchgfx::View<Screen3Presenter>
 {
@@ -25,8 +28,35 @@ protected:
      * Member Declarations
      */
     touchgfx::Box __background;
+    touchgfx::Image bg;
+    touchgfx::Image basket;
+    touchgfx::Image apple;
+    touchgfx::Image grape;
+    touchgfx::Image banana;
+    touchgfx::Image heart;
+    touchgfx::Image snowflake;
+    touchgfx::Image bomb;
+    touchgfx::TextArea textArea1;
+    touchgfx::TextArea textArea2;
+    touchgfx::TextArea textArea3;
+    touchgfx::TextArea textArea4;
+    touchgfx::TextArea textArea5;
+    touchgfx::TextArea textArea6;
+    touchgfx::TextArea textArea7;
+    touchgfx::Image title;
+    touchgfx::IconButtonStyle< touchgfx::ClickButtonTrigger >  home;
 
 private:
+
+    /*
+     * Callback Declarations
+     */
+    touchgfx::Callback<Screen3ViewBase, const touchgfx::AbstractButtonContainer&> flexButtonCallback;
+
+    /*
+     * Callback Handler Declarations
+     */
+    void flexButtonCallbackHandler(const touchgfx::AbstractButtonContainer& src);
 
 };
 
