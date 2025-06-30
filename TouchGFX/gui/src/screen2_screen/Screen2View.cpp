@@ -50,7 +50,7 @@ bool Screen2View::checkCollisionWithFruit(FruitObject& fruit)
 bool Screen2View::checkCollisionWithBomb()
 {
     if (!isBombActive) return false;
-    
+
     int16_t x1 = basket.getX();
     int16_t y1 = basket.getY();
     int16_t w1 = basket.getWidth();
@@ -68,7 +68,7 @@ bool Screen2View::checkCollisionWithBomb()
 bool Screen2View::checkCollisionWithHeart()
 {
     if (!isHeartActive) return false;
-    
+
     int16_t x1 = basket.getX();
     int16_t y1 = basket.getY();
     int16_t w1 = basket.getWidth();
@@ -86,7 +86,7 @@ bool Screen2View::checkCollisionWithHeart()
 bool Screen2View::checkCollisionWithSnowflake()
 {
     if (!isSnowflakeActive) return false;
-    
+
     int16_t x1 = basket.getX();
     int16_t y1 = basket.getY();
     int16_t w1 = basket.getWidth();
@@ -105,10 +105,10 @@ void Screen2View::spawnSpecialItem()
 {
     // Chọn ngẫu nhiên heart hoặc snowflake
     SpecialItemType itemType = static_cast<SpecialItemType>(xorshift32() % 2);
-    
+
     int index = xorshift32() % 6;
     int newX = index * 40 + 15;
-    
+
     if (itemType == SpecialItemType::HEART) {
         isHeartActive = true;
         heart.setX(newX);
@@ -136,14 +136,14 @@ void Screen2View::spawnNewFruit()
     }
 
     if (emptySlot == -1) return; // Không có slot trống
-    
+
     // Chọn loại trái cây ngẫu nhiên
     FruitType fruitType = static_cast<FruitType>(xorshift32() % 3);
-    
+
     // Tìm widget trái cây phù hợp mà CHƯA được sử dụng
     touchgfx::Image* widget = nullptr;
     bool widgetFound = false;
-    
+
     // Kiểm tra xem widget này đã được dùng chưa
     for (int attempt = 0; attempt < 10 && !widgetFound; attempt++) {
         switch(fruitType) {
@@ -157,7 +157,7 @@ void Screen2View::spawnNewFruit()
                 widget = &grape;
                 break;
         }
-        
+
         // Kiểm tra xem widget này có đang được dùng bởi fruit khác không
         bool isUsed = false;
         for (int j = 0; j < MAX_FRUITS; j++) {
@@ -166,7 +166,7 @@ void Screen2View::spawnNewFruit()
                 break;
             }
         }
-        
+
         if (!isUsed) {
             widgetFound = true;
         } else {
@@ -174,12 +174,12 @@ void Screen2View::spawnNewFruit()
             fruitType = static_cast<FruitType>((static_cast<int>(fruitType) + 1) % 3);
         }
     }
-    
+
     if (!widgetFound) return; // Không tìm được widget phù hợp
-    
+
     // Tạo FruitObject mới
     activeFruits[emptySlot] = FruitObject(fruitType, widget);
-    
+
     // Đặt vị trí ngẫu nhiên trong 6 làn
     int index = xorshift32() % 6;
     int newX = index * 40 + 15;
@@ -192,7 +192,7 @@ void Screen2View::spawnNewFruit()
 void Screen2View::updateFruitPosition(FruitObject& fruit)
 {
     if (!fruit.isActive) return;
-    
+
     int newY = fruit.y + fallSpeed;
     fruit.setPosition(fruit.x, newY);
 }
@@ -203,24 +203,24 @@ void Screen2View::updateAllFruits()
         if (activeFruits[i].isActive) {
             updateFruitPosition(activeFruits[i]);
 
-            // Kiểm tra fruit có ra khỏi màn hình không  
+            // Kiểm tra fruit có ra khỏi màn hình không
             if (activeFruits[i].y >= 320) {
                 // Fruit ra khỏi màn hình -> trừ 1 HP
                 hp--;
-                
+
                 // Phát âm thanh khi miss fruit
                 play_lose_hp();
-                
+
                 // Hiển thị damage bg effect
                 showDamageBg();
-                
+
                 // Không còn combo system
 
                 // Ẩn fruit này và reset trạng thái
                 activeFruits[i].setVisible(false);
                 activeFruits[i] = FruitObject(); // Reset hoàn toàn object
                 activeFruitCount--;
-                
+
                 // Đảm bảo activeFruitCount không âm
                 if (activeFruitCount < 0) {
                     activeFruitCount = 0;
@@ -235,10 +235,10 @@ void Screen2View::updateAllFruits()
                 if (hp <= 0) {
                     isGameOver = true;
                     textGameOver.setVisible(true);
-                    
+
                     // Phát music game over
                     play_game_over();
-                    
+
                     // Hiện button restart khi game over
                     flexButton2.setVisible(true);
 
@@ -269,7 +269,7 @@ void Screen2View::checkAllFruitCollisions()
                 highScore = score;
                 presenter->SetHighScore(highScore);  // Save to model via presenter
             }
-            
+
             // Phát âm thanh khi bắt được fruit
             play_catch_sound();
 
@@ -287,7 +287,7 @@ void Screen2View::checkAllFruitCollisions()
             activeFruits[i].setVisible(false);
             activeFruits[i] = FruitObject(); // Reset hoàn toàn object
             activeFruitCount--;
-            
+
             // Đảm bảo activeFruitCount không âm
             if (activeFruitCount < 0) {
                 activeFruitCount = 0;
@@ -335,15 +335,15 @@ void Screen2View::showDamageBg()
     // Ẩn bg bình thường và bg frozen
     bg.setVisible(false);
     bgBlue.setVisible(false);
-    
+
     // Hiện bg damage
     bgRed.setVisible(true);
-    
+
     // Invalidate để update hiển thị
     bg.invalidate();
     bgRed.invalidate();
     bgBlue.invalidate();
-    
+
     // Set timer cho 0.25 giây (15 ticks @ 60Hz)
     isDamageBgActive = true;
     damageBgTimer = 15;
@@ -362,7 +362,7 @@ void Screen2View::resetToNormalBg()
         bgBlue.setVisible(false);
         bg.setVisible(true);
     }
-    
+
     // Invalidate để update hiển thị
     bg.invalidate();
     bgRed.invalidate();
@@ -378,7 +378,7 @@ void Screen2View::restartGame()
     activeFruitCount = 0;
     lastFruitSpawnTick = 0;
     maxActiveFruits = 2;
-    
+
     // Reset game progression
     tickCount = 0;
     fallSpeed = 2;
@@ -388,27 +388,27 @@ void Screen2View::restartGame()
     minSpawnInterval = 30;
     maxSpawnInterval = 90;
     bombSpawnChance = 3;
-    
+
     // Reset special items
     isHeartActive = false;
     isSnowflakeActive = false;
     snowflakeTimer = 0;
     originalFallSpeed = 2;
-    
+
     // Reset blast effect
     isBlastActive = false;
     blastTimer = 0;
-    
+
     // Reset bg effects
     isDamageBgActive = false;
     damageBgTimer = 0;
-    
+
     // Reset game state
     isGameOver = false;
-    
+
     // Ẩn button restart khi game đang chạy
     flexButton2.setVisible(false);
-    
+
     // Cập nhật hiển thị
     Unicode::snprintf(scoreBuffer, sizeof(scoreBuffer), "%d", score);
     textScore.setWildcard(scoreBuffer);
@@ -417,11 +417,11 @@ void Screen2View::restartGame()
     Unicode::snprintf(hpBuffer, sizeof(hpBuffer), "%d", hp);
     hpScore.setWildcard(hpBuffer);
     hpScore.invalidate();
-    
+
     // Reset vị trí xe
     basket.setX(localImageX);
     basket.invalidate();
-    
+
     // Ẩn tất cả objects
     bomb.setVisible(false);
     blast.setVisible(false);
@@ -431,12 +431,12 @@ void Screen2View::restartGame()
     banana.setVisible(false);
     grape.setVisible(false);
     textGameOver.setVisible(false);
-    
+
     // Reset bg về bình thường
     bg.setVisible(true);
     bgRed.setVisible(false);
     bgBlue.setVisible(false);
-    
+
     // Invalidate tất cả
     bomb.invalidate();
     blast.invalidate();
@@ -471,7 +471,7 @@ void Screen2View::forceSpawnSpecialItem()
 void Screen2View::setupScreen()
 {
     stop_katyusha_theme();
-    
+
     localImageX = presenter->GetImageX();
     score = 0;
     highScore = presenter->GetHighScore();
@@ -480,28 +480,28 @@ void Screen2View::setupScreen()
     activeFruitCount = 0;
     lastFruitSpawnTick = 0;
     maxActiveFruits = 2; // Bắt đầu với 2 fruit
-    
+
     // Gọi base setup TRƯỚC
     Screen2ViewBase::setupScreen();
-    
+
     // SAU ĐÓ mới cập nhật các buffer để overwrite giá trị mặc định
     basket.setX(localImageX);
-    
+
     // Khởi tạo hiển thị HP
     Unicode::snprintf(hpBuffer, sizeof(hpBuffer), "%d", hp);
     hpScore.setWildcard(hpBuffer);
     hpScore.invalidate();
-    
+
     // Khởi tạo hiển thị Score
     Unicode::snprintf(scoreBuffer, sizeof(scoreBuffer), "%d", score);
     textScore.setWildcard(scoreBuffer);
     textScore.invalidate();
-    
+
     // Khởi tạo hiển thị HighScore
     Unicode::snprintf(highScoreBuffer, sizeof(highScoreBuffer), "%d", highScore);
     textHighScore.setWildcard(highScoreBuffer);
     textHighScore.invalidate();
-    
+
     // Ẩn bomb, blast và special items khi bắt đầu
     bomb.setVisible(false);
     blast.setVisible(false);
@@ -512,14 +512,14 @@ void Screen2View::setupScreen()
     isHeartActive = false;
     isSnowflakeActive = false;
     snowflakeTimer = 0;
-    
+
     // Khởi tạo bg effects - hiện bg bình thường
     bg.setVisible(true);
     bgRed.setVisible(false);
     bgBlue.setVisible(false);
     isDamageBgActive = false;
     damageBgTimer = 0;
-    
+
     // Ẩn tất cả fruit và button restart
     apple.setVisible(false);
     banana.setVisible(false);
@@ -646,7 +646,7 @@ void Screen2View::handleTickEvent()
     updateAllFruits();
     checkAllFruitCollisions();
     spawnFruitIfNeeded();
-    
+
     // 3b. Xử lý bg effects
     updateBgEffects();
 
@@ -679,7 +679,7 @@ void Screen2View::handleTickEvent()
         blast.invalidate();
 
         hp--;
-        
+
         play_lose_hp();
 
         // Hiển thị damage bg effect
@@ -692,10 +692,10 @@ void Screen2View::handleTickEvent()
         if (hp <= 0) {
             isGameOver = true;
             textGameOver.setVisible(true);
-            
+
             // Phát music game over
             play_game_over();
-            
+
             // Hiện button restart khi game over (cần thêm flexButton2 trong TouchGFX Designer)
             flexButton2.setVisible(true);
 
@@ -709,7 +709,7 @@ void Screen2View::handleTickEvent()
             return;
         }
     }
-    
+
     // 5b. Xử lý special items
     // Xử lý heart rơi
     if (isHeartActive) {
@@ -722,7 +722,7 @@ void Screen2View::handleTickEvent()
             heart.setY(newHeartY);
         }
     }
-    
+
     // Xử lý snowflake rơi
     if (isSnowflakeActive) {
         int newSnowflakeY = snowflake.getY() + fallSpeed;
@@ -734,37 +734,37 @@ void Screen2View::handleTickEvent()
             snowflake.setY(newSnowflakeY);
         }
     }
-    
+
     // Kiểm tra va chạm với heart
     if (checkCollisionWithHeart()) {
         hp++;
         isHeartActive = false;
         heart.setVisible(false);
         heart.invalidate();
-        
-        // Phát âm thanh khi ăn heart
-        play_special_effect();
-        
+
+        // Phát âm thanh khi ăn heart (dùng cùng âm thanh như ăn quả)
+        play_catch_sound();
+
         Unicode::snprintf(hpBuffer, sizeof(hpBuffer), "%d", hp);
         hpScore.setWildcard(hpBuffer);
         hpScore.invalidate();
     }
-    
+
     // Kiểm tra va chạm với snowflake
     if (checkCollisionWithSnowflake()) {
         // Kích hoạt slowdown effect trong 5 giây (300 ticks)
         originalFallSpeed = fallSpeed;
         fallSpeed = fallSpeed / 2; // Giảm tốc độ xuống một nửa
         if (fallSpeed < 1) fallSpeed = 1;
-        
+
         snowflakeTimer = 300; // 5 giây @ 60Hz
         isSnowflakeActive = false;
         snowflake.setVisible(false);
         snowflake.invalidate();
-        
-        // Phát âm thanh khi ăn snowflake
-        play_special_effect();
-        
+
+        // Phát âm thanh khi ăn snowflake (dùng cùng âm thanh như ăn quả)
+        play_catch_sound();
+
         // Hiển thị frozen bg effect (bgBlue) nếu không đang có damage effect
         if (!isDamageBgActive) {
             bg.setVisible(false);
@@ -775,14 +775,14 @@ void Screen2View::handleTickEvent()
             bgBlue.invalidate();
         }
     }
-    
+
     // Xử lý snowflake timer
     if (snowflakeTimer > 0) {
         snowflakeTimer--;
         if (snowflakeTimer == 0) {
             // Khôi phục tốc độ ban đầu
             fallSpeed = originalFallSpeed;
-            
+
             // Reset về bg bình thường nếu không có damage effect
             if (!isDamageBgActive) {
                 resetToNormalBg();
@@ -800,10 +800,10 @@ void Screen2View::handleTickEvent()
         bomb.setVisible(true);
         bomb.invalidate();
     }
-    
+
     // 6b. Tạo special items (heart/snowflake) - sử dụng biến từ main.c để dễ test
-    if (!isHeartActive && !isSnowflakeActive && 
-        (tickCount % specialEffectSpawnInterval == 0) && 
+    if (!isHeartActive && !isSnowflakeActive &&
+        (tickCount % specialEffectSpawnInterval == 0) &&
         (xorshift32() % specialEffectSpawnChance == 0)) {
         spawnSpecialItem();
     }

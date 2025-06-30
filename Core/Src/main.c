@@ -221,7 +221,7 @@ int main(void)
   MX_TIM1_Init();
   MX_TouchGFX_Init();
   /* USER CODE BEGIN 2 */
-  
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -242,10 +242,10 @@ int main(void)
   /* USER CODE BEGIN RTOS_QUEUES */
   /* creation of Queue1 */
   Queue1Handle = osMessageQueueNew (8, sizeof(uint8_t), &Queue1_attributes);
-  
+
   /* creation of BuzzerQueue */
   BuzzerQueueHandle = osMessageQueueNew (16, sizeof(BuzzerCommand_t), &BuzzerQueue_attributes);
-  
+
   /* Initialize buzzer system AFTER queue creation */
   buzzer_init(&htim1, TIM_CHANNEL_2, BuzzerQueueHandle);
   /* USER CODE END RTOS_QUEUES */
@@ -1075,7 +1075,7 @@ void play_tone(uint16_t frequency, uint16_t duration)
   */
 void play_game_over(void)
 {
-    buzzer_play_game_over();
+    buzzer_play_bg(BG_GAME_OVER);
 }
 
 /**
@@ -1083,8 +1083,7 @@ void play_game_over(void)
   */
 void play_intro_music(void)
 {
-    // buzzer_play_intro_music();  // Original intro music - commented out
-    buzzer_play_katyusha_theme();   // New Katyusha theme instead
+    buzzer_play_bg(BG_KATYUSHA);   // Play Katyusha theme instead of intro
 }
 
 /**
@@ -1092,7 +1091,7 @@ void play_intro_music(void)
   */
 void play_catch_sound(void)
 {
-    buzzer_play_catch_sound();
+    buzzer_play_sfx(SFX_CATCH);
 }
 
 /**
@@ -1100,15 +1099,16 @@ void play_catch_sound(void)
   */
 void play_lose_hp(void)
 {
-    buzzer_play_lose_hp();
+    buzzer_play_sfx(SFX_LOSE_HP);
 }
 
 /**
   * @brief  Wrapper function to play special effect sound - calls buzzer module
+  * @note  Now uses the same sound as catching fruit
   */
 void play_special_effect(void)
 {
-    buzzer_play_special_effect();
+    buzzer_play_sfx(SFX_CATCH);  // Use catch sound for special effects
 }
 
 /**
@@ -1124,7 +1124,7 @@ void play_debug_test(void)
   */
 void play_katyusha_theme(void)
 {
-    buzzer_play_katyusha_theme();
+    buzzer_play_bg(BG_KATYUSHA);
 }
 
 /**
@@ -1165,7 +1165,7 @@ void StartDefaultTask(void *argument)
   /* USER CODE BEGIN 5 */
   static uint8_t button_a_prev = 0;  // Lưu trạng thái trước của nút A
   uint8_t button_a_current;
-  
+
   /* Infinite loop */
   for(;;)
   {
@@ -1177,20 +1177,20 @@ void StartDefaultTask(void *argument)
 	      uint8_t msg = 'R';  // Right
 	      osMessageQueuePut(Queue1Handle, &msg, 0, 0);
 	  }
-	  
+
 	  // Xử lý nút A với edge detection để tránh phát buzzer liên tục
 	  button_a_current = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
 	  if (button_a_current == GPIO_PIN_SET) {
 	      uint8_t msg = 'A';  // Reset
 	      osMessageQueuePut(Queue1Handle, &msg, 0, 0);
-	      
+
 	      // Debug test - phát 3 beep để test queue hoạt động
 	      if (button_a_prev == 0) {
 	          play_debug_test();  // Test buzzer queue
 	      }
 	  }
 	  button_a_prev = button_a_current;
-	  
+
 	  osDelay(10);  // Tăng delay lên 10ms để giảm bounce
   }
   /* USER CODE END 5 */

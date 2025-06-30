@@ -76,23 +76,27 @@ typedef struct {
 
 #define REST 0  // Nghỉ (không phát âm)
 
-/* Function Prototypes */
+/* Sound effect types */
+#define SFX_CATCH    1  // Catch fruit sound
+#define SFX_LOSE_HP  2  // Lose HP sound
+
+/* Background music types */
+#define BG_KATYUSHA    1  // Katyusha theme
+#define BG_GAME_OVER   2  // Game over music
+
+/* Core Function Prototypes */
 void buzzer_init(TIM_HandleTypeDef *htim, uint32_t channel, osMessageQueueId_t queue);
 void buzzer_tone(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t frequency, uint16_t duration);
-void buzzer_test(void);
 void buzzer_play_tone(uint16_t frequency, uint16_t duration);
-void buzzer_play_test_sequence(void);
 void buzzer_task(void *argument);
 void buzzer_play_music_track(MusicNote_t* notes, uint16_t noteCount);
 void buzzer_stop_music_track(void);
-void buzzer_play_game_over(void);
-void buzzer_play_intro_music(void);
-void buzzer_play_catch_sound(void);
-void buzzer_play_lose_hp(void);
-void buzzer_play_special_effect(void);
 
-/* SIUUUUUUUUUUUUUUU */
-void buzzer_play_katyusha_theme(void);
+/* New Simplified API */
+void buzzer_play_sfx(int type);  // Play sound effects
+void buzzer_play_bg(int type);   // Play background music
+
+/* Katyusha control functions */
 void buzzer_stop_katyusha_theme(void);
 bool buzzer_is_katyusha_playing(void);
 
@@ -103,4 +107,4 @@ void buzzer_debug_test(void);
 }
 #endif
 
-#endif /* __BUZZER_H */ 
+#endif /* __BUZZER_H */
