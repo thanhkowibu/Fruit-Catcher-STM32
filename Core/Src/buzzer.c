@@ -18,6 +18,9 @@ static osMessageQueueId_t buzzer_queue;
 /* Global music track variable */
 static MusicTrack_t currentTrack = {0};
 
+/* Katyusha loop control variable */
+static bool katyushaLoopEnabled = false;
+
 /* Private function prototypes -----------------------------------------------*/
 
 /* Public Functions ----------------------------------------------------------*/
@@ -109,6 +112,10 @@ void buzzer_play_test_sequence(void)
   * @brief  Buzzer Task - handles all buzzer operations
   * @param  argument: Not used
   */
+/**
+  * @brief  Modified Buzzer Task - handles all buzzer operations with Katyusha loop support
+  * @param  argument: Not used
+  */
 void buzzer_task(void *argument)
 {
     BuzzerCommand_t cmd;
@@ -163,8 +170,16 @@ void buzzer_task(void *argument)
             
             // Kiểm tra xem đã hết track chưa
             if (currentTrack.currentNote >= currentTrack.noteCount) {
-                currentTrack.isPlaying = false;
-                currentTrack.currentNote = 0;
+                // Nếu đang trong chế độ Katyusha loop
+                if (katyushaLoopEnabled) {
+                    // Reset về đầu để loop
+                    currentTrack.currentNote = 0;
+                    osDelay(1000); // Nghỉ 1 giây giữa các lần loop
+                } else {
+                    // Track bình thường -> dừng
+                    currentTrack.isPlaying = false;
+                    currentTrack.currentNote = 0;
+                }
             }
         } else {
             // Không có gì để phát
@@ -266,3 +281,137 @@ void buzzer_debug_test(void)
     buzzer_play_tone(1200, 100); 
     buzzer_play_tone(1400, 100);
 } 
+
+
+/* Private variables - thêm vào phần private variables */
+static MusicTrack_t katyushaTrack = {0};
+
+/**
+  * @brief  Katyusha melody notes array
+  */
+static MusicNote_t katyusha_notes[] = {
+    // Phrase 1 - MODERATE TEMPO (1.5x speed)
+    {D4, 270, 70},   // D4
+    {REST, 130, 0},   // rest
+    {E4, 270, 70},   // E4
+    {F4, 270, 70},   // F4
+    {REST, 130, 0},   // rest
+    {D4, 270, 70},   // D4
+    {F4, 270, 70},   // F4
+    {F4, 270, 70},   // F4
+    {E4, 270, 70},   // E4
+    {D4, 270, 70},   // D4
+    {E4, 270, 70},   // E4
+    {A3, 270, 70},   // A3
+    {E4, 270, 70},   // E4
+    {REST, 130, 0},   // rest
+    {F4, 270, 70},   // F4
+    {G4, 270, 70},   // G4
+    {REST, 130, 0},   // rest
+    {E4, 270, 70},   // E4
+    {G4, 270, 70},   // G4
+    {G4, 270, 70},   // G4
+    {F4, 270, 70},   // F4
+    {E4, 270, 70},   // E4
+    {D4, 270, 70},   // D4
+    {REST, 270, 0},   // rest
+    {REST, 270, 0},   // rest
+
+    // Phrase 2 - MODERATE TEMPO (1.5x speed)
+    {A4, 270, 70},   // A4
+    {REST, 130, 0},   // rest
+    {D5, 270, 70},   // D5
+    {REST, 130, 0},   // rest
+    {C5, 270, 70},   // C5
+    {REST, 130, 0},   // rest
+    {D5, 270, 70},   // D5
+    {BB4, 270, 70},  // Bb4
+    {BB4, 270, 70},  // Bb4
+    {A4, 270, 70},   // A4
+    {G4, 270, 70},   // G4
+    {A4, 270, 70},   // A4
+    {D4, 270, 70},   // D4
+    {REST, 270, 0},   // rest
+    {REST, 270, 0},   // rest
+    {BB4, 270, 70},  // Bb4
+    {G4, 270, 70},   // G4
+    {A4, 270, 70},   // A4
+    {REST, 130, 0},   // rest
+    {E4, 270, 70},   // E4
+    {G4, 270, 70},   // G4
+    {G4, 270, 70},   // G4
+    {F4, 270, 70},   // F4
+    {E4, 270, 70},   // E4
+    {D4, 270, 70},   // D4
+    {REST, 270, 0},   // rest
+    {REST, 270, 0},   // rest
+
+    // Phrase 3 (repeat of phrase 2) - MODERATE TEMPO (1.5x speed)
+    {A4, 270, 70},   // A4
+    {REST, 130, 0},   // rest
+    {D5, 270, 70},   // D5
+    {REST, 130, 0},   // rest
+    {C5, 270, 70},   // C5
+    {REST, 130, 0},   // rest
+    {D5, 270, 70},   // D5
+    {BB4, 270, 70},  // Bb4
+    {BB4, 270, 70},  // Bb4
+    {A4, 270, 70},   // A4
+    {G4, 270, 70},   // G4
+    {A4, 270, 70},   // A4
+    {D4, 270, 70},   // D4
+    {REST, 270, 0},   // rest
+    {REST, 270, 0},   // rest
+    {BB4, 270, 70},  // Bb4
+    {G4, 270, 70},   // G4
+    {A4, 270, 70},   // A4
+    {REST, 130, 0},   // rest
+    {E4, 270, 70},   // E4
+    {G4, 270, 70},   // G4
+    {G4, 270, 70},   // G4
+    {F4, 270, 70},   // F4
+    {E4, 270, 70},   // E4
+    {D4, 270, 70},   // D4
+    {REST, 270, 0},   // rest
+    {REST, 270, 0},   // rest
+    {REST, 530, 0},   // ending pause
+};
+
+/**
+  * @brief  Play Katyusha theme in loop mode
+  */
+void buzzer_play_katyusha_theme(void)
+{
+    // Stop current music if playing
+    buzzer_stop_music_track();
+
+    // Enable Katyusha loop mode
+    katyushaLoopEnabled = true;
+
+    // Set up Katyusha track
+    katyushaTrack.notes = katyusha_notes;
+    katyushaTrack.noteCount = sizeof(katyusha_notes) / sizeof(MusicNote_t);
+    katyushaTrack.currentNote = 0;
+    katyushaTrack.isPlaying = true;
+
+    // Set as current track
+    currentTrack = katyushaTrack;
+}
+
+/**
+  * @brief  Stop Katyusha theme
+  */
+void buzzer_stop_katyusha_theme(void)
+{
+    katyushaLoopEnabled = false;
+    buzzer_stop_music_track();
+}
+
+/**
+  * @brief  Check if Katyusha is currently playing
+  * @retval true if Katyusha is playing, false otherwise
+  */
+bool buzzer_is_katyusha_playing(void)
+{
+    return katyushaLoopEnabled && currentTrack.isPlaying;
+}

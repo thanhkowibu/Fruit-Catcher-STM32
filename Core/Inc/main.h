@@ -73,6 +73,8 @@ void play_intro_music(void);
 void play_special_effect(void);
 void stop_music_track(void);
 void play_debug_test(void);
+void play_katyusha_theme(void);
+void stop_katyusha_theme(void);
 
 #ifdef __cplusplus
 }

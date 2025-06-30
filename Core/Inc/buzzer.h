@@ -57,6 +57,9 @@ typedef struct {
 #define A5  880
 #define AS5 932
 #define B5  988
+#define A3  220
+#define BB4 466
+#define C5  523
 
 #define C6  1047
 #define CS6 1109
@@ -87,6 +90,11 @@ void buzzer_play_intro_music(void);
 void buzzer_play_catch_sound(void);
 void buzzer_play_lose_hp(void);
 void buzzer_play_special_effect(void);
+
+/* SIUUUUUUUUUUUUUUU */
+void buzzer_play_katyusha_theme(void);
+void buzzer_stop_katyusha_theme(void);
+bool buzzer_is_katyusha_playing(void);
 
 /* Debug function */
 void buzzer_debug_test(void);

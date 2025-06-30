@@ -1083,7 +1083,8 @@ void play_game_over(void)
   */
 void play_intro_music(void)
 {
-    buzzer_play_intro_music();
+    // buzzer_play_intro_music();  // Original intro music - commented out
+    buzzer_play_katyusha_theme();   // New Katyusha theme instead
 }
 
 /**
@@ -1116,6 +1117,22 @@ void play_special_effect(void)
 void play_debug_test(void)
 {
     buzzer_debug_test();
+}
+
+/**
+  * @brief  Wrapper function to play Katyusha theme - calls buzzer module
+  */
+void play_katyusha_theme(void)
+{
+    buzzer_play_katyusha_theme();
+}
+
+/**
+  * @brief  Wrapper function to stop Katyusha theme - calls buzzer module
+  */
+void stop_katyusha_theme(void)
+{
+    buzzer_stop_katyusha_theme();
 }
 
 /**
