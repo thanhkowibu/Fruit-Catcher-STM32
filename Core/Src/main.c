@@ -172,7 +172,6 @@ void                      play_intro_music(void);
 void                      play_catch_sound(void);
 void                      play_lose_hp(void);
 void                      play_special_effect(void);
-void                      play_debug_test(void);
 
 /* USER CODE END PFP */
 
@@ -1112,14 +1111,6 @@ void play_special_effect(void)
 }
 
 /**
-  * @brief  Debug function to test buzzer queue
-  */
-void play_debug_test(void)
-{
-    buzzer_debug_test();
-}
-
-/**
   * @brief  Wrapper function to play Katyusha theme - calls buzzer module
   */
 void play_katyusha_theme(void)
@@ -1183,11 +1174,6 @@ void StartDefaultTask(void *argument)
 	  if (button_a_current == GPIO_PIN_SET) {
 	      uint8_t msg = 'A';  // Reset
 	      osMessageQueuePut(Queue1Handle, &msg, 0, 0);
-
-	      // Debug test - phát 3 beep để test queue hoạt động
-	      if (button_a_prev == 0) {
-	          play_debug_test();  // Test buzzer queue
-	      }
 	  }
 	  button_a_prev = button_a_current;
 
