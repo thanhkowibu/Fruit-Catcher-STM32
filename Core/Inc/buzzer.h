@@ -11,25 +11,70 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-/* Buzzer Command Structure */
+/* Type Definitions ----------------------------------------------------------*/
+
+/**
+  * @brief  Buzzer Command Structure for sound effects
+  */
 typedef struct {
     uint16_t frequency;
     uint16_t duration;
 } BuzzerCommand_t;
 
-/* Music System - MIDI-like format but non-blocking */
+/**
+  * @brief  Music Note Structure
+  */
 typedef struct {
-    uint16_t frequency;  // Tần số (Hz)
-    uint16_t duration;   // Thời gian phát (ms)
-    uint16_t pause;      // Thời gian nghỉ sau note (ms)
+    uint16_t frequency;  // Frequency in Hz (0 = REST)
+    uint16_t duration;   // Duration in ms
+    uint16_t pause;      // Pause after note in ms
 } MusicNote_t;
 
+/**
+  * @brief  Music Track Structure - unified for all music types
+  */
 typedef struct {
     MusicNote_t* notes;
     uint16_t noteCount;
     uint16_t currentNote;
     bool isPlaying;
+    bool shouldLoop;     // Unified loop control
 } MusicTrack_t;
+
+/**
+  * @brief  Sound Effect Types
+  */
+typedef enum {
+    SFX_CATCH = 0,
+    SFX_LOSE_HP,
+    SFX_COUNT        // Used for validation
+} SfxType_t;
+
+/**
+  * @brief  Background Music Types
+  */
+typedef enum {
+    BG_KATYUSHA = 0,
+    BG_GAME_OVER,
+    BG_COUNT         // Used for validation
+} BgMusicType_t;
+
+/**
+  * @brief  Sound Effect Configuration
+  */
+typedef struct {
+    uint16_t frequency;
+    uint16_t duration;
+} SfxConfig_t;
+
+/**
+  * @brief  Background Music Configuration
+  */
+typedef struct {
+    MusicNote_t* notes;
+    uint16_t noteCount;
+    bool shouldLoop;
+} BgMusicConfig_t;
 
 /* Note frequency definitions - standard musical notes */
 #define C4  262
@@ -44,7 +89,6 @@ typedef struct {
 #define A4  440
 #define AS4 466
 #define B4  494
-
 #define C5  523
 #define CS5 554
 #define D5  587
@@ -59,8 +103,6 @@ typedef struct {
 #define B5  988
 #define A3  220
 #define BB4 466
-#define C5  523
-
 #define C6  1047
 #define CS6 1109
 #define D6  1175
@@ -73,35 +115,77 @@ typedef struct {
 #define A6  1760
 #define AS6 1865
 #define B6  1976
+#define REST 0      // Rest (no sound)
 
-#define REST 0  // Nghỉ (không phát âm)
+/* Public Function Prototypes -----------------------------------------------*/
 
-/* Sound effect types */
-#define SFX_CATCH    1  // Catch fruit sound
-#define SFX_LOSE_HP  2  // Lose HP sound
-
-/* Background music types */
-#define BG_KATYUSHA    1  // Katyusha theme
-#define BG_GAME_OVER   2  // Game over music
-
-/* Core Function Prototypes */
+/**
+  * @brief  Initialize buzzer system
+  * @param  htim: Timer handle for PWM
+  * @param  channel: Timer channel
+  * @param  queue: Message queue handle
+  */
 void buzzer_init(TIM_HandleTypeDef *htim, uint32_t channel, osMessageQueueId_t queue);
-void buzzer_tone(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t frequency, uint16_t duration);
+
+/**
+  * @brief  Non-blocking function to play a tone
+  * @param  frequency: Frequency in Hz
+  * @param  duration: Duration in ms
+  */
 void buzzer_play_tone(uint16_t frequency, uint16_t duration);
+
+/**
+  * @brief  Buzzer Task - handles all buzzer operations
+  * @param  argument: Not used
+  */
 void buzzer_task(void *argument);
-void buzzer_play_music_track(MusicNote_t* notes, uint16_t noteCount);
+
+/**
+  * @brief  Play a music track (unified interface)
+  * @param  notes: Array of music notes
+  * @param  noteCount: Number of notes in the track
+  * @param  shouldLoop: Whether the track should loop
+  */
+void buzzer_play_music_track(MusicNote_t* notes, uint16_t noteCount, bool shouldLoop);
+
+/**
+  * @brief  Stop current music track
+  */
 void buzzer_stop_music_track(void);
 
-/* New Simplified API */
-void buzzer_play_sfx(int type);  // Play sound effects
-void buzzer_play_bg(int type);   // Play background music
+/**
+  * @brief  Play sound effects (type-safe)
+  * @param  type: Sound effect type
+  */
+void buzzer_play_sfx(SfxType_t type);
 
-/* Katyusha control functions */
-void buzzer_stop_katyusha_theme(void);
-bool buzzer_is_katyusha_playing(void);
+/**
+  * @brief  Play background music (type-safe)
+  * @param  type: Background music type
+  */
+void buzzer_play_bg(BgMusicType_t type);
 
-/* Debug function */
-void buzzer_debug_test(void);
+/**
+  * @brief  Check if any music is currently playing
+  * @retval true if music is playing, false otherwise
+  */
+bool buzzer_is_music_playing(void);
+
+/**
+  * @brief  Check if current track is looping
+  * @retval true if current track is looping, false otherwise
+  */
+bool buzzer_is_looping(void);
+
+/* Backward Compatibility Macros (deprecated) -------------------------------*/
+#define SFX_CATCH_OLD    SFX_CATCH
+#define SFX_LOSE_HP_OLD  SFX_LOSE_HP
+#define BG_KATYUSHA_OLD  BG_KATYUSHA
+#define BG_GAME_OVER_OLD BG_GAME_OVER
+
+/* Legacy function aliases (deprecated - use new APIs) */
+#define buzzer_stop_katyusha_theme() buzzer_stop_music_track()
+#define buzzer_is_katyusha_playing() buzzer_is_looping()
 
 #ifdef __cplusplus
 }

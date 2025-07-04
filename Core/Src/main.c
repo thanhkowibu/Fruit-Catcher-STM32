@@ -1123,7 +1123,7 @@ void play_katyusha_theme(void)
   */
 void stop_katyusha_theme(void)
 {
-    buzzer_stop_katyusha_theme();
+	buzzer_stop_music_track();
 }
 
 /**

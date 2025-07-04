@@ -2,12 +2,12 @@
 /**
   ******************************************************************************
   * @file           : buzzer.c
-  * @brief          : Buzzer system implementation for FruitCatcher game
+  * @brief          : Refactored buzzer system implementation for FruitCatcher game
+  *                   Following SOLID principles and DRY pattern
   ******************************************************************************
   */
 /* USER CODE END Header */
 
-/* Includes ------------------------------------------------------------------*/
 #include "buzzer.h"
 
 /* Private variables ---------------------------------------------------------*/
@@ -15,14 +15,8 @@ static TIM_HandleTypeDef *buzzer_htim;
 static uint32_t buzzer_channel;
 static osMessageQueueId_t buzzer_queue;
 
-/* Global music track variable */
+/* Unified music system - no more separate Katyusha logic */
 static MusicTrack_t currentTrack = {0};
-
-/* Katyusha loop control variable */
-static bool katyushaLoopEnabled = false;
-
-/* Private variables for music tracks */
-static MusicTrack_t katyushaTrack = {0};
 
 /* Music track constants */
 #define GAME_OVER_NOTE_COUNT 5
@@ -33,6 +27,12 @@ static MusicNote_t game_over_notes[];
 static MusicNote_t katyusha_notes[];
 
 /* Private function prototypes -----------------------------------------------*/
+static void buzzer_play_note(uint16_t frequency, uint16_t duration);
+static void buzzer_handle_track_end(void);
+static void buzzer_process_current_note(void);
+static void buzzer_configure_pwm(uint16_t frequency);
+static void buzzer_start_pwm(void);
+static void buzzer_stop_pwm(void);
 
 /* Public Functions ----------------------------------------------------------*/
 
@@ -47,31 +47,11 @@ void buzzer_init(TIM_HandleTypeDef *htim, uint32_t channel, osMessageQueueId_t q
     buzzer_htim = htim;
     buzzer_channel = channel;
     buzzer_queue = queue;
-}
 
-/**
-  * @brief  Generate tone using PWM timer
-  * @param  htim: Timer handle
-  * @param  channel: Timer channel
-  * @param  frequency: Frequency in Hz
-  * @param  duration: Duration in ms
-  */
-void buzzer_tone(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t frequency, uint16_t duration)
-{
-    // Tính toán Period và Pulse với timer clock = 1MHz (180MHz/(179+1))
-    uint32_t period = 1000000 / frequency; // Tính giá trị cho ARR
-    uint32_t pulse = period / 2;          // Tính giá trị cho CCR (duty cycle 50%)
-
-    // Cấu hình lại Timer
-    __HAL_TIM_SET_AUTORELOAD(htim, period - 1); // Cập nhật chu kỳ
-    __HAL_TIM_SET_COMPARE(htim, channel, pulse); // Cập nhật độ rộng xung
-
-    // Bắt đầu phát âm
-    HAL_TIM_PWM_Start(htim, channel);
-    osDelay(duration); // Sử dụng osDelay thay vì HAL_Delay để không block FreeRTOS
-
-    // Dừng phát âm
-    HAL_TIM_PWM_Stop(htim, channel);
+    // Initialize track state
+    currentTrack.isPlaying = false;
+    currentTrack.currentNote = 0;
+    currentTrack.shouldLoop = false;
 }
 
 /**
@@ -81,105 +61,63 @@ void buzzer_tone(TIM_HandleTypeDef *htim, uint32_t channel, uint16_t frequency, 
   */
 void buzzer_play_tone(uint16_t frequency, uint16_t duration)
 {
-    BuzzerCommand_t cmd;
-    cmd.frequency = frequency;
-    cmd.duration = duration;
+    BuzzerCommand_t cmd = {
+        .frequency = frequency,
+        .duration = duration
+    };
 
-    // Gửi command đến buzzer queue (non-blocking)
     osMessageQueuePut(buzzer_queue, &cmd, 0, 0);
 }
 
 /**
-  * @brief  Buzzer Task - handles all buzzer operations with Katyusha loop support
+  * @brief  Unified buzzer task - handles all buzzer operations
   * @param  argument: Not used
   */
 void buzzer_task(void *argument)
 {
     BuzzerCommand_t cmd;
-    osStatus_t status;
+    const uint32_t QUEUE_TIMEOUT_MS = 5;
+    const uint32_t IDLE_DELAY_MS = 20;
 
     for(;;)
     {
-        // Kiểm tra sound effects với timeout ngắn hơn
-        status = osMessageQueueGet(buzzer_queue, &cmd, NULL, 5);  // 5ms timeout
-
-        if (status == osOK)
+        // Check for sound effects (highest priority)
+        if (osMessageQueueGet(buzzer_queue, &cmd, NULL, QUEUE_TIMEOUT_MS) == osOK)
         {
-            // Có sound effect -> phát ngay (interrupt music nếu cần)
-            uint32_t period = 1000000 / cmd.frequency;
-            uint32_t pulse = period / 2;
-
-            __HAL_TIM_SET_AUTORELOAD(buzzer_htim, period - 1);
-            __HAL_TIM_SET_COMPARE(buzzer_htim, buzzer_channel, pulse);
-
-            HAL_TIM_PWM_Start(buzzer_htim, buzzer_channel);
-            osDelay(cmd.duration);
-            HAL_TIM_PWM_Stop(buzzer_htim, buzzer_channel);
-
-            osDelay(20); // Nghỉ ngắn sau sound effect
+            // Sound effect interrupts any playing music
+            buzzer_play_note(cmd.frequency, cmd.duration);
+            osDelay(IDLE_DELAY_MS); // Brief pause after sound effect
         }
-        else if (currentTrack.isPlaying && currentTrack.notes != NULL) {
-            // Không có sound effect -> phát music track
-            MusicNote_t* currentNote = &currentTrack.notes[currentTrack.currentNote];
-
-            if (currentNote->frequency > 0) {  // Không phải REST
-                uint32_t period = 1000000 / currentNote->frequency;
-                uint32_t pulse = period / 2;
-
-                __HAL_TIM_SET_AUTORELOAD(buzzer_htim, period - 1);
-                __HAL_TIM_SET_COMPARE(buzzer_htim, buzzer_channel, pulse);
-
-                HAL_TIM_PWM_Start(buzzer_htim, buzzer_channel);
-                osDelay(currentNote->duration);
-                HAL_TIM_PWM_Stop(buzzer_htim, buzzer_channel);
-            } else {
-                // REST note
-                osDelay(currentNote->duration);
-            }
-
-            // Pause giữa các notes
-            if (currentNote->pause > 0) {
-                osDelay(currentNote->pause);
-            }
-
-            // Chuyển sang note tiếp theo
-            currentTrack.currentNote++;
-
-            // Kiểm tra xem đã hết track chưa
-            if (currentTrack.currentNote >= currentTrack.noteCount) {
-                // Nếu đang trong chế độ Katyusha loop
-                if (katyushaLoopEnabled) {
-                    // Reset về đầu để loop
-                    currentTrack.currentNote = 0;
-                    osDelay(1000); // Nghỉ 1 giây giữa các lần loop
-                } else {
-                    // Track bình thường -> dừng
-                    currentTrack.isPlaying = false;
-                    currentTrack.currentNote = 0;
-                }
-            }
-        } else {
-            // Không có gì để phát
-            osDelay(20);
+        else if (currentTrack.isPlaying && currentTrack.notes != NULL)
+        {
+            // Process current music track
+            buzzer_process_current_note();
+        }
+        else
+        {
+            // Nothing to do
+            osDelay(IDLE_DELAY_MS);
         }
     }
 }
 
 /**
-  * @brief  Play a music track (non-blocking)
+  * @brief  Play a music track (unified interface)
   * @param  notes: Array of music notes
   * @param  noteCount: Number of notes in the track
+  * @param  shouldLoop: Whether the track should loop
   */
-void buzzer_play_music_track(MusicNote_t* notes, uint16_t noteCount)
+void buzzer_play_music_track(MusicNote_t* notes, uint16_t noteCount, bool shouldLoop)
 {
     // Stop current track if playing
     buzzer_stop_music_track();
 
-    // Set new track
+    // Configure new track
     currentTrack.notes = notes;
     currentTrack.noteCount = noteCount;
     currentTrack.currentNote = 0;
     currentTrack.isPlaying = true;
+    currentTrack.shouldLoop = shouldLoop;
 }
 
 /**
@@ -189,79 +127,149 @@ void buzzer_stop_music_track(void)
 {
     currentTrack.isPlaying = false;
     currentTrack.currentNote = 0;
-    HAL_TIM_PWM_Stop(buzzer_htim, buzzer_channel);
+    currentTrack.shouldLoop = false;
+    buzzer_stop_pwm();
 }
 
 /**
   * @brief  Play sound effects
-  * @param  type: Sound effect type (SFX_CATCH or SFX_LOSE_HP)
+  * @param  type: Sound effect type
   */
-void buzzer_play_sfx(int type)
+void buzzer_play_sfx(SfxType_t type)
 {
-    switch(type) {
-        case SFX_CATCH:
-            // High pitched success sound (catch fruit)
-            buzzer_play_tone(1500, 100);
-            break;
+    const SfxConfig_t sfx_configs[] = {
+        [SFX_CATCH] = {1500, 100},      // High pitched success sound
+        [SFX_LOSE_HP] = {300, 250},     // Low pitched fail sound
+    };
 
-        case SFX_LOSE_HP:
-            // Low pitched fail sound (lose HP)
-            buzzer_play_tone(300, 250);
-            break;
-
-        default:
-            // Invalid type, do nothing
-            break;
+    if (type < SFX_COUNT) {
+        const SfxConfig_t* config = &sfx_configs[type];
+        buzzer_play_tone(config->frequency, config->duration);
     }
 }
 
 /**
   * @brief  Play background music
-  * @param  type: Background music type (BG_KATYUSHA or BG_GAME_OVER)
+  * @param  type: Background music type
   */
-void buzzer_play_bg(int type)
+void buzzer_play_bg(BgMusicType_t type)
 {
-    switch(type) {
-        case BG_KATYUSHA:
-            // Play Katyusha theme in loop mode
-            buzzer_stop_music_track();
-            katyushaLoopEnabled = true;
-            katyushaTrack.notes = katyusha_notes;
-            katyushaTrack.noteCount = KATYUSHA_NOTE_COUNT;
-            katyushaTrack.currentNote = 0;
-            katyushaTrack.isPlaying = true;
-            currentTrack = katyushaTrack;
-            break;
+    const BgMusicConfig_t bg_configs[] = {
+        [BG_KATYUSHA] = {katyusha_notes, KATYUSHA_NOTE_COUNT, true},    // Looping
+        [BG_GAME_OVER] = {game_over_notes, GAME_OVER_NOTE_COUNT, false} // One-shot
+    };
 
-        case BG_GAME_OVER:
-            // Play game over music (one-shot)
-            buzzer_stop_music_track();
-            katyushaLoopEnabled = false;
-            buzzer_play_music_track(game_over_notes, GAME_OVER_NOTE_COUNT);
-            break;
-
-        default:
-            // Invalid type, do nothing
-            break;
+    if (type < BG_COUNT) {
+        const BgMusicConfig_t* config = &bg_configs[type];
+        buzzer_play_music_track(config->notes, config->noteCount, config->shouldLoop);
     }
 }
 
 /**
-  * @brief  Stop Katyusha theme
+  * @brief  Check if any music is currently playing
+  * @retval true if music is playing, false otherwise
   */
-void buzzer_stop_katyusha_theme(void)
+bool buzzer_is_music_playing(void)
 {
-    katyushaLoopEnabled = false;
-    buzzer_stop_music_track();
+    return currentTrack.isPlaying;
 }
 
 /**
-  * @brief  Check if Katyusha is currently playing
-  * @retval true if Katyusha is playing, false otherwise
+  * @brief  Check if current track is looping
+  * @retval true if current track is looping, false otherwise
   */
-bool buzzer_is_katyusha_playing(void)
+bool buzzer_is_looping(void)
 {
-    return katyushaLoopEnabled && currentTrack.isPlaying;
+    return currentTrack.shouldLoop && currentTrack.isPlaying;
+}
+
+/* Private Functions ---------------------------------------------------------*/
+
+/**
+  * @brief  Play a single note with PWM
+  * @param  frequency: Frequency in Hz
+  * @param  duration: Duration in ms
+  */
+static void buzzer_play_note(uint16_t frequency, uint16_t duration)
+{
+    if (frequency > 0) {
+        buzzer_configure_pwm(frequency);
+        buzzer_start_pwm();
+        osDelay(duration);
+        buzzer_stop_pwm();
+    } else {
+        // REST note
+        osDelay(duration);
+    }
+}
+
+/**
+  * @brief  Process the current note in the playing track
+  */
+static void buzzer_process_current_note(void)
+{
+    MusicNote_t* currentNote = &currentTrack.notes[currentTrack.currentNote];
+
+    // Play the note
+    buzzer_play_note(currentNote->frequency, currentNote->duration);
+
+    // Add pause if specified
+    if (currentNote->pause > 0) {
+        osDelay(currentNote->pause);
+    }
+
+    // Advance to next note
+    currentTrack.currentNote++;
+
+    // Check if track ended
+    if (currentTrack.currentNote >= currentTrack.noteCount) {
+        buzzer_handle_track_end();
+    }
+}
+
+/**
+  * @brief  Handle track end logic (loop or stop)
+  */
+static void buzzer_handle_track_end(void)
+{
+    if (currentTrack.shouldLoop) {
+        // Reset to beginning for loop
+        currentTrack.currentNote = 0;
+        osDelay(1000); // Pause between loops
+    } else {
+        // Stop the track
+        buzzer_stop_music_track();
+    }
+}
+
+/**
+  * @brief  Configure PWM parameters for given frequency
+  * @param  frequency: Frequency in Hz
+  */
+static void buzzer_configure_pwm(uint16_t frequency)
+{
+    // Calculate Period and Pulse with timer clock = 1MHz (180MHz/(179+1))
+    uint32_t period = 1000000 / frequency;
+    uint32_t pulse = period / 2; // 50% duty cycle
+
+    __HAL_TIM_SET_AUTORELOAD(buzzer_htim, period - 1);
+    __HAL_TIM_SET_COMPARE(buzzer_htim, buzzer_channel, pulse);
+}
+
+/**
+  * @brief  Start PWM output
+  */
+static void buzzer_start_pwm(void)
+{
+    HAL_TIM_PWM_Start(buzzer_htim, buzzer_channel);
+}
+
+/**
+  * @brief  Stop PWM output
+  */
+static void buzzer_stop_pwm(void)
+{
+    HAL_TIM_PWM_Stop(buzzer_htim, buzzer_channel);
 }
 
 /* Music Data Arrays ---------------------------------------------------------*/
